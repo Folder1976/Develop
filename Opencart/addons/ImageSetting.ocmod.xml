@@ -1,0 +1,286 @@
+<modification>
+	<name>Image setting</name>
+	<code>Image setting</code>
+	<version>1.0</version>
+	<author>Folder Kotlyarov Sergey</author>
+	<link>https://skillcode.ru</link>
+	<file path="admin/view/template/setting/setting.tpl">
+		<operation  error="skip">
+			<search ><![CDATA[<li><a href="#tab-server" data-toggle="tab"><?php echo $tab_server; ?></a></li>]]></search>
+			<add position="after" ><![CDATA[
+				<!-- Image setting -->
+				  <li><a href="#tab-imagesetting" data-toggle="tab">Картинки</a></li>
+				<!-- Image setting END -->
+					  ]]></add>
+		</operation>
+		<operation  error="skip">
+			<search><![CDATA[<div class="tab-pane" id="tab-ftp">]]></search>
+			<add position="before" ><![CDATA[
+				<!-- Image setting -->
+				<div class="tab-pane" id="tab-imagesetting">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_thumb_width">theme_default_image_thumb_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_thumb_width" value="<?php echo $theme_default_image_thumb_width; ?>"id="input-theme_default_image_thumb_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_thumb_height">theme_default_image_thumb_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_thumb_height" value="<?php echo $theme_default_image_thumb_height; ?>"id="input-theme_default_image_thumb_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_popup_width">theme_default_image_popup_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_popup_width" value="<?php echo $theme_default_image_popup_width; ?>"id="input-theme_default_image_popup_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_popup_height">theme_default_image_popup_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_popup_height" value="<?php echo $theme_default_image_popup_height; ?>"id="input-theme_default_image_popup_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_category_width">theme_default_image_category_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_category_width" value="<?php echo $theme_default_image_category_width; ?>"id="input-theme_default_image_category_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_category_height">theme_default_image_category_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_category_height" value="<?php echo $theme_default_image_category_height; ?>"id="input-theme_default_image_category_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_product_width">theme_default_image_product_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_product_width" value="<?php echo $theme_default_image_product_width; ?>"id="input-theme_default_image_product_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_product_height">theme_default_image_product_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_product_height" value="<?php echo $theme_default_image_product_height; ?>"id="input-theme_default_image_product_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_additional_width">theme_default_image_additional_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_additional_width" value="<?php echo $theme_default_image_additional_width; ?>"id="input-theme_default_image_additional_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_additional_height">theme_default_image_additional_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_additional_height" value="<?php echo $theme_default_image_additional_height; ?>"id="input-theme_default_image_additional_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_related_width">theme_default_image_related_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_related_width" value="<?php echo $theme_default_image_related_width; ?>"id="input-theme_default_image_related_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_related_height">theme_default_image_related_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_related_height" value="<?php echo $theme_default_image_related_height; ?>"id="input-theme_default_image_related_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_compare_width">theme_default_image_compare_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_compare_width" value="<?php echo $theme_default_image_compare_width; ?>"id="input-theme_default_image_compare_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_compare_height">theme_default_image_compare_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_compare_height" value="<?php echo $theme_default_image_compare_height; ?>"id="input-theme_default_image_compare_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_wishlist_width">theme_default_image_wishlist_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_wishlist_width" value="<?php echo $theme_default_image_wishlist_width; ?>"id="input-theme_default_image_wishlist_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_wishlist_height">theme_default_image_wishlist_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_wishlist_height" value="<?php echo $theme_default_image_wishlist_height; ?>"id="input-theme_default_image_wishlist_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_cart_width">theme_default_image_cart_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_cart_width" value="<?php echo $theme_default_image_cart_width; ?>"id="input-theme_default_image_cart_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_cart_height">theme_default_image_cart_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_cart_height" value="<?php echo $theme_default_image_cart_height; ?>"id="input-theme_default_image_cart_height" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_location_width">theme_default_image_location_width</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_location_width" value="<?php echo $theme_default_image_location_width; ?>"id="input-theme_default_image_location_width" class="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-theme_default_image_location_height">theme_default_image_location_height</label>
+						<div class="col-sm-10">
+							<input type="text" name="theme_default_image_location_height" value="<?php echo $theme_default_image_location_height; ?>"id="input-theme_default_image_location_height" class="form-control" />
+						</div>
+					</div>
+
+				</div>
+				<!-- Image setting END -->
+					  ]]></add>
+		</operation>
+	</file>	
+	<file path="admin/controller/setting/setting.php">
+		<operation  error="skip">
+			<search><![CDATA[$this->model_setting_setting->editSetting('config', $this->request->post);]]></search>
+			<add position="before" ><![CDATA[
+				// Image setting * * * Start
+				  	$this->model_setting_setting->editSetting('theme', $this->request->post);
+				// Image setting * * * End
+			]]></add>
+		</operation>
+		<operation  error="skip">
+			<search><![CDATA[if (isset($this->request->post['config_ftp_port'])) {]]></search>
+			<add position="before" ><![CDATA[
+				// Image setting * * * Start
+				  	if (isset($this->request->post['theme_default_image_thumb_width'])) {
+						$data['theme_default_image_thumb_width'] = $this->request->post['theme_default_image_thumb_width'];
+					} else {
+						$data['theme_default_image_thumb_width'] = $this->config->get('theme_default_image_thumb_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_thumb_height'])) {
+						$data['theme_default_image_thumb_height'] = $this->request->post['theme_default_image_thumb_height'];
+					} else {
+						$data['theme_default_image_thumb_height'] = $this->config->get('theme_default_image_thumb_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_popup_width'])) {
+						$data['theme_default_image_popup_width'] = $this->request->post['theme_default_image_popup_width'];
+					} else {
+						$data['theme_default_image_popup_width'] = $this->config->get('theme_default_image_popup_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_popup_height'])) {
+						$data['theme_default_image_popup_height'] = $this->request->post['theme_default_image_popup_height'];
+					} else {
+						$data['theme_default_image_popup_height'] = $this->config->get('theme_default_image_popup_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_category_width'])) {
+						$data['theme_default_image_category_width'] = $this->request->post['theme_default_image_category_width'];
+					} else {
+						$data['theme_default_image_category_width'] = $this->config->get('theme_default_image_category_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_category_height'])) {
+						$data['theme_default_image_category_height'] = $this->request->post['theme_default_image_category_height'];
+					} else {
+						$data['theme_default_image_category_height'] = $this->config->get('theme_default_image_category_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_product_width'])) {
+						$data['theme_default_image_product_width'] = $this->request->post['theme_default_image_product_width'];
+					} else {
+						$data['theme_default_image_product_width'] = $this->config->get('theme_default_image_product_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_product_height'])) {
+						$data['theme_default_image_product_height'] = $this->request->post['theme_default_image_product_height'];
+					} else {
+						$data['theme_default_image_product_height'] = $this->config->get('theme_default_image_product_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_additional_width'])) {
+						$data['theme_default_image_additional_width'] = $this->request->post['theme_default_image_additional_width'];
+					} else {
+						$data['theme_default_image_additional_width'] = $this->config->get('theme_default_image_additional_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_additional_height'])) {
+						$data['theme_default_image_additional_height'] = $this->request->post['theme_default_image_additional_height'];
+					} else {
+						$data['theme_default_image_additional_height'] = $this->config->get('theme_default_image_additional_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_related_width'])) {
+						$data['theme_default_image_related_width'] = $this->request->post['theme_default_image_related_width'];
+					} else {
+						$data['theme_default_image_related_width'] = $this->config->get('theme_default_image_related_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_related_height'])) {
+						$data['theme_default_image_related_height'] = $this->request->post['theme_default_image_related_height'];
+					} else {
+						$data['theme_default_image_related_height'] = $this->config->get('theme_default_image_related_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_compare_width'])) {
+						$data['theme_default_image_compare_width'] = $this->request->post['theme_default_image_compare_width'];
+					} else {
+						$data['theme_default_image_compare_width'] = $this->config->get('theme_default_image_compare_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_compare_height'])) {
+						$data['theme_default_image_compare_height'] = $this->request->post['theme_default_image_compare_height'];
+					} else {
+						$data['theme_default_image_compare_height'] = $this->config->get('theme_default_image_compare_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_wishlist_width'])) {
+						$data['theme_default_image_wishlist_width'] = $this->request->post['theme_default_image_wishlist_width'];
+					} else {
+						$data['theme_default_image_wishlist_width'] = $this->config->get('theme_default_image_wishlist_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_wishlist_height'])) {
+						$data['theme_default_image_wishlist_height'] = $this->request->post['theme_default_image_wishlist_height'];
+					} else {
+						$data['theme_default_image_wishlist_height'] = $this->config->get('theme_default_image_wishlist_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_cart_height'])) {
+						$data['theme_default_image_cart_height'] = $this->request->post['theme_default_image_cart_height'];
+					} else {
+						$data['theme_default_image_cart_height'] = $this->config->get('theme_default_image_cart_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_cart_width'])) {
+						$data['theme_default_image_cart_width'] = $this->request->post['theme_default_image_cart_width'];
+					} else {
+						$data['theme_default_image_cart_width'] = $this->config->get('theme_default_image_cart_width');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_location_height'])) {
+						$data['theme_default_image_location_height'] = $this->request->post['theme_default_image_location_height'];
+					} else {
+						$data['theme_default_image_location_height'] = $this->config->get('theme_default_image_location_height');
+					}
+
+				  	if (isset($this->request->post['theme_default_image_location_width'])) {
+						$data['theme_default_image_location_width'] = $this->request->post['theme_default_image_location_width'];
+					} else {
+						$data['theme_default_image_location_width'] = $this->config->get('theme_default_image_location_width');
+					}
+
+				// Image setting * * * End
+					  ]]></add>
+		</operation>
+
+	</file>	
+</modification>
+

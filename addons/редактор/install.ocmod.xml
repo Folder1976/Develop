@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+   <name>Editor de Texto e HTML</name>
+   <code>EditoR de Texto e HTML</code>
+   <version>1.0.0</version>
+   <author>Opencart Master</author>
+   <url>http://www.opencartmaster.com.br</url>
+  
+ 
+   <file path="admin/view/template/catalog/information_form.tpl">
+      <operation>
+         <search trim="true"><![CDATA[<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>]]></search>
+         <add position="replace" offset="2"><![CDATA[
+           <script type="text/javascript" src="view/javascript/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+    
+    tinymce.init({
+    selector: '.summernote',
+	theme: 'modern',
+	 fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 36pt",
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+  ],
+ 
+  toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | image2',
+  height: 200,
+  toolbar2: 'print preview media | forecolor backcolor emoticons | sizeselect | bold italic | fontselect |  fontsizeselect |codesample',
+  image_advtab: true,
+   setup: function (editor) {
+    editor.addButton('image2', {
+      text: 'Insert Image',
+      icon: false,
+      onclick: function () {
+      $('#modal-image').remove();
+						
+							$.ajax({
+								url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+								dataType: 'html',
+								beforeSend: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+									$('#button-image').prop('disabled', true);
+								},
+								complete: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+									$('#button-image').prop('disabled', false);
+								},
+								success: function(html) {
+									$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+									
+									$('#modal-image').modal('show');
+									
+									$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+										e.preventDefault();
+										var caminho = $(this).attr('href');
+										editor.insertContent('<img alt="Imagem" src="' + caminho + '"  />');
+																	
+										$('#modal-image').modal('hide');
+									});
+								}
+							});			
+        
+      }
+    });
+  },
+  	
+  });
+   
+   
+    </script>
+         
+         ]]></add>
+         
+      </operation>
+     
+   </file>
+   
+   <file path="admin/view/template/catalog/product_form.tpl">
+       <operation>
+         <search trim="true"><![CDATA[<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>]]></search>
+         <add position="replace" offset="2"><![CDATA[
+           <script type="text/javascript" src="view/javascript/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+    tinymce.init({
+      selector: '.summernote',
+	theme: 'modern',
+	  fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 36pt",
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+  ],
+ 
+  toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | image2',
+  height: 200,
+  toolbar2: 'print preview media | forecolor backcolor emoticons | sizeselect | bold italic | fontselect |  fontsizeselect |codesample',
+  image_advtab: true,
+   setup: function (editor) {
+    editor.addButton('image2', {
+      text: 'Insert Image',
+      icon: false,
+      onclick: function () {
+      $('#modal-image').remove();
+						
+							$.ajax({
+								url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+								dataType: 'html',
+								beforeSend: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+									$('#button-image').prop('disabled', true);
+								},
+								complete: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+									$('#button-image').prop('disabled', false);
+								},
+								success: function(html) {
+									$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+									
+									$('#modal-image').modal('show');
+									
+									$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+										e.preventDefault();
+										var caminho = $(this).attr('href');
+										editor.insertContent('<img alt="Imagem" src="' + caminho + '"  />');
+																	
+										$('#modal-image').modal('hide');
+									});
+								}
+							});			
+        
+      }
+    });
+  },
+  	
+  });
+   
+    
+    </script>
+         
+         ]]></add>
+         
+      </operation>
+      
+   </file>
+
+   
+   <file path="admin/view/template/catalog/category_form.tpl">
+          <operation>
+         <search trim="true"><![CDATA[<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>]]></search>
+         <add position="replace" offset="2"><![CDATA[
+           <script type="text/javascript" src="view/javascript/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+    tinymce.init({
+    selector: '.summernote',
+	theme: 'modern',
+	  fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 36pt",
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+  ],
+ 
+  toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | image2',
+  height: 200,
+  toolbar2: 'print preview media | forecolor backcolor emoticons | sizeselect | bold italic | fontselect |  fontsizeselect |codesample',
+  image_advtab: true,
+   setup: function (editor) {
+    editor.addButton('image2', {
+      text: 'Insert Image',
+      icon: false,
+      onclick: function () {
+      $('#modal-image').remove();
+						
+							$.ajax({
+								url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+								dataType: 'html',
+								beforeSend: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+									$('#button-image').prop('disabled', true);
+								},
+								complete: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+									$('#button-image').prop('disabled', false);
+								},
+								success: function(html) {
+									$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+									
+									$('#modal-image').modal('show');
+									
+									$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+										e.preventDefault();
+										var caminho = $(this).attr('href');
+										editor.insertContent('<img alt="Imagem" src="' + caminho + '"  />');
+																	
+										$('#modal-image').modal('hide');
+									});
+								}
+							});			
+        
+      }
+    });
+  },
+  	
+  });
+   
+    </script>
+         
+         ]]></add>
+         
+      </operation>
+     
+   </file>
+   
+  
+   <file path="admin/view/template/extension/module/html.tpl">
+           <operation>
+         <search trim="true"><![CDATA[<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>]]></search>
+         <add position="replace" offset="2"><![CDATA[
+           <script type="text/javascript" src="view/javascript/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+    tinymce.init({
+      selector: '.summernote',
+	theme: 'modern',
+	 fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 36pt",
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+  ],
+ 
+  toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | image2',
+  height: 200,
+  toolbar2: 'print preview media | forecolor backcolor emoticons | sizeselect | bold italic | fontselect |  fontsizeselect |codesample',
+  image_advtab: true,
+   setup: function (editor) {
+    editor.addButton('image2', {
+      text: 'Insert Image',
+      icon: false,
+      onclick: function () {
+      $('#modal-image').remove();
+						
+							$.ajax({
+								url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+								dataType: 'html',
+								beforeSend: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+									$('#button-image').prop('disabled', true);
+								},
+								complete: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+									$('#button-image').prop('disabled', false);
+								},
+								success: function(html) {
+									$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+									
+									$('#modal-image').modal('show');
+									
+									$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+										e.preventDefault();
+										var caminho = $(this).attr('href');
+										editor.insertContent('<img alt="Imagem" src="' + caminho + '"  />');
+																	
+										$('#modal-image').modal('hide');
+									});
+								}
+							});			
+        
+      }
+    });
+  },
+  	
+  });
+   
+    
+    </script>
+         
+         ]]></add>
+         
+      </operation>
+   </file>
+  
+   <file path="admin/view/template/marketing/contact.tpl">
+     
+           <operation>
+         <search trim="true"><![CDATA[<script type="text/javascript" src="view/javascript/summernote/summernote.js"></script>]]></search>
+         <add position="replace" offset="2"><![CDATA[
+           <script type="text/javascript" src="view/javascript/tinymce/tinymce.min.js"></script>
+    <script type="text/javascript">
+    tinymce.init({
+    selector: '#input-message',
+theme: 'modern',
+	  fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 36pt",
+  plugins: [
+    'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+    'searchreplace wordcount visualblocks visualchars code fullscreen',
+    'insertdatetime media nonbreaking save table contextmenu directionality',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample'
+  ],
+ 
+  toolbar1: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | image2',
+  height: 200,
+  toolbar2: 'print preview media | forecolor backcolor emoticons | sizeselect | bold italic | fontselect |  fontsizeselect |codesample',
+  image_advtab: true,
+   setup: function (editor) {
+    editor.addButton('image2', {
+      text: 'Insert Image',
+      icon: false,
+      onclick: function () {
+      $('#modal-image').remove();
+						
+							$.ajax({
+								url: 'index.php?route=common/filemanager&token=' + getURLVar('token'),
+								dataType: 'html',
+								beforeSend: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-circle-o-notch fa-spin"></i>');
+									$('#button-image').prop('disabled', true);
+								},
+								complete: function() {
+									$('#button-image i').replaceWith('<i class="fa fa-upload"></i>');
+									$('#button-image').prop('disabled', false);
+								},
+								success: function(html) {
+									$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
+									
+									$('#modal-image').modal('show');
+									
+									$('#modal-image').delegate('a.thumbnail', 'click', function(e) {
+										e.preventDefault();
+										var caminho = $(this).attr('href');
+										editor.insertContent('<img alt="Imagem" src="' + caminho + '"  />');
+																	
+										$('#modal-image').modal('hide');
+									});
+								}
+							});			
+        
+      }
+    });
+  },
+  	
+  });
+   
+    
+    </script>
+         
+         ]]></add>
+         
+      </operation>
+   </file>
+   
+</modification>
