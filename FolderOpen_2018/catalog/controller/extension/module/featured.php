@@ -14,6 +14,7 @@ class ControllerExtensionModuleFeatured extends Controller {
 		$data['button_compare'] = $this->language->get('button_compare');
 
 		$this->load->model('catalog/product');
+		$this->load->model('catalog/category');
 
 		$this->load->model('tool/image');
 
