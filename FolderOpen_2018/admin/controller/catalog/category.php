@@ -143,6 +143,28 @@ class ControllerCatalogCategory extends Controller {
 	}
 
 	protected function getList() {
+		
+		
+		$sql = "CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "category_video`  (
+						`category_video_id` int(11) NOT NULL AUTO_INCREMENT,
+						`category_id` int(11) NOT NULL,
+						`video` varchar(255) DEFAULT NULL,
+						`sort_order` int(3) NOT NULL DEFAULT '0',
+						PRIMARY KEY (`category_video_id`),
+						KEY `category_id` (`category_id`)
+					  ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		$this->db->query($sql);
+		
+		$sql = "CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "category_image`  (
+						`category_image_id` int(11) NOT NULL AUTO_INCREMENT,
+						`category_id` int(11) NOT NULL,
+						`video` varchar(255) DEFAULT NULL,
+						`sort_order` int(3) NOT NULL DEFAULT '0',
+						PRIMARY KEY (`category_image_id`),
+						KEY `category_id` (`category_id`)
+					  ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
+		$this->db->query($sql);
+		
 		if (isset($this->request->get['sort'])) {
 			$sort = $this->request->get['sort'];
 		} else {
@@ -295,6 +317,7 @@ class ControllerCatalogCategory extends Controller {
 	}
 
 	protected function getForm() {
+		
 		$data['heading_title'] = $this->language->get('heading_title');
 
 		$data['text_form'] = !isset($this->request->get['category_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
@@ -318,6 +341,8 @@ class ControllerCatalogCategory extends Controller {
 		$data['entry_sort_order'] = $this->language->get('entry_sort_order');
 		$data['entry_status'] = $this->language->get('entry_status');
 		$data['entry_layout'] = $this->language->get('entry_layout');
+		$data['entry_additional_image'] = $this->language->get('entry_additional_image');
+		$data['button_image_add'] = $this->language->get('button_image_add');
 
 		$data['help_filter'] = $this->language->get('help_filter');
 		$data['help_keyword'] = $this->language->get('help_keyword');
@@ -492,12 +517,58 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 
+				// Images
+		if (isset($this->request->post['category_image'])) {
+			$category_images = $this->request->post['category_image'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_images = $this->model_catalog_category->getCategoryImages($this->request->get['category_id']);
+		} else {
+			$category_images = array();
+		}
+		
+		$data['category_videos'] = array();
+		if (isset($this->request->post['category_video'])) {
+			$category_video = $this->request->post['category_video'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$category_video = $this->model_catalog_category->getVideoImages($this->request->get['category_id']);
+		} else {
+			$category_video = array();
+		}
+		$data['category_videos'] = $category_video;
+
+
+		$data['category_images'] = array();
+
+		foreach ($category_images as $category_image) {
+			if (is_file(DIR_IMAGE . $category_image['image'])) {
+				$image = $category_image['image'];
+				$thumb = $category_image['image'];
+			} else {
+				$image = '';
+				$thumb = 'no_image.png';
+			}
+
+			$data['category_images'][] = array(
+				'image'      => $image,
+				'thumb'      => $this->model_tool_image->resize($thumb, 100, 100),
+				'sort_order' => $category_image['sort_order']
+			);
+		}
+		
 		if (isset($this->request->post['top'])) {
 			$data['top'] = $this->request->post['top'];
 		} elseif (!empty($category_info)) {
 			$data['top'] = $category_info['top'];
 		} else {
 			$data['top'] = 0;
+		}
+
+		if (isset($this->request->post['style'])) {
+			$data['style'] = $this->request->post['style'];
+		} elseif (!empty($category_info)) {
+			$data['style'] = $category_info['style'];
+		} else {
+			$data['style'] = 0;
 		}
 
 		if (isset($this->request->post['column'])) {
@@ -643,3 +714,4 @@ class ControllerCatalogCategory extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 }
+

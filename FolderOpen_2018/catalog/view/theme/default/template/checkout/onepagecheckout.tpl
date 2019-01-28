@@ -85,6 +85,15 @@
 
                                 <?php } ?>
                             </table>
+      <?php if ($modules) { ?>
+      <h2><?php echo $text_next; ?></h2>
+      <p><?php echo $text_next_choice; ?></p>
+      <div class="panel-group" id="accordion">
+        <?php foreach ($modules as $module) { ?>
+        <?php echo $module; ?>
+        <?php } ?>
+      </div>
+      <?php } ?>
                         <table id='totals' class='table mt-4'>
                             <tbody>
                             <?php foreach ($totals as $total) { ?>

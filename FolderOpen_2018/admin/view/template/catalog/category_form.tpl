@@ -28,6 +28,8 @@
           <ul class="nav nav-tabs">
             <li class="active"><a href="#tab-general" data-toggle="tab"><?php echo $tab_general; ?></a></li>
             <li><a href="#tab-data" data-toggle="tab"><?php echo $tab_data; ?></a></li>
+            <li><a href="#tab-image" data-toggle="tab">Фотогалерея работ</a></li>
+            <li><a href="#tab-video" data-toggle="tab">Видео</a></li>
             <li><a href="#tab-design" data-toggle="tab"><?php echo $tab_design; ?></a></li>
           </ul>
           <div class="tab-content">
@@ -164,6 +166,20 @@
                   </div>
                 </div>
               </div>
+               <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-style"><span data-toggle="tooltip" title="Выводить подкатегории с картинками">Подкатегории с картинками</span></label>
+                <div class="col-sm-10">
+                  <div class="checkbox">
+                    <label>
+                      <?php if ($style) { ?>
+                      <input type="checkbox" name="style" value="1" checked="checked" id="input-style" />
+                      <?php } else { ?>
+                      <input type="checkbox" name="style" value="1" id="input-style" />
+                      <?php } ?>
+                      &nbsp; </label>
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-column"><span data-toggle="tooltip" title="<?php echo $help_column; ?>"><?php echo $entry_column; ?></span></label>
                 <div class="col-sm-10">
@@ -191,6 +207,67 @@
                 </div>
               </div>
             </div>
+            <div class="tab-pane" id="tab-image">
+              <div class="table-responsive">
+                <table id="images" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left"><?php echo $entry_additional_image; ?></td>
+                      <td class="text-right"><?php echo $entry_sort_order; ?></td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php $image_row = 0; ?>
+                    <?php foreach ($category_images as $category_image) { ?>
+                    <tr id="image-row<?php echo $image_row; ?>">
+                      <td class="text-left"><a href="" id="thumb-image<?php echo $image_row; ?>" data-toggle="image" class="img-thumbnail"><img src="<?php echo $category_image['thumb']; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="hidden" name="category_image[<?php echo $image_row; ?>][image]" value="<?php echo $category_image['image']; ?>" id="input-image<?php echo $image_row; ?>" /></td>
+                      <td class="text-right"><input type="text" name="category_image[<?php echo $image_row; ?>][sort_order]" value="<?php echo $category_image['sort_order']; ?>" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>
+                      <td class="text-left"><button type="button" onclick="$('#image-row<?php echo $image_row; ?>').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                    </tr>
+                    <?php $image_row++; ?>
+                    <?php } ?>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td class="text-left"><button type="button" onclick="addImage();" data-toggle="tooltip" title="<?php echo $button_image_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+           <div class="tab-pane" id="tab-video">
+              <div class="table-responsive">
+                <table id="videos" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td class="text-left">Линк на видео ютуб</td>
+                      <td class="text-right"><?php echo $entry_sort_order; ?></td>
+                      <td></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php $video_row = 0; ?>
+                    <?php foreach ($category_videos as $category_video) { ?>
+                    <tr id="video-row<?php echo $video_row; ?>">
+                      <td class="text-right"><input type="text" name="category_video[<?php echo $video_row; ?>][video]" value="<?php echo $category_video['video']; ?>" placeholder="https://www.youtube.com/embed/4itETgKvBtE" class="form-control" /></td>
+                      <td class="text-right"><input type="text" name="category_video[<?php echo $video_row; ?>][sort_order]" value="<?php echo $category_video['sort_order']; ?>" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>
+                      <td class="text-left"><button type="button" onclick="$('#video-row<?php echo $video_row; ?>').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>
+                    </tr>
+                    <?php $video_row++; ?>
+                    <?php } ?>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td class="text-left"><button type="button" onclick="addVideo();" data-toggle="tooltip" title="<?php echo $button_image_add; ?>" class="btn btn-primary"><i class="fa fa-plus-circle"></i></button></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+ 
             <div class="tab-pane" id="tab-design">
               <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -296,7 +373,36 @@ $('input[name=\'filter\']').autocomplete({
 $('#category-filter').delegate('.fa-minus-circle', 'click', function() {
 	$(this).parent().remove();
 });
-//--></script> 
+//--></script>
+    <script type="text/javascript"><!--
+var image_row = <?php echo $image_row; ?>;
+
+function addImage() {
+	html  = '<tr id="image-row' + image_row + '">';
+	html += '  <td class="text-left"><a href="" id="thumb-image' + image_row + '"data-toggle="image" class="img-thumbnail"><img src="<?php echo $placeholder; ?>" alt="" title="" data-placeholder="<?php echo $placeholder; ?>" /></a><input type="hidden" name="category_image[' + image_row + '][image]" value="" id="input-image' + image_row + '" /></td>';
+	html += '  <td class="text-right"><input type="text" name="category_image[' + image_row + '][sort_order]" value="" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#image-row' + image_row  + '\').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';
+
+	$('#images tbody').append(html);
+
+	image_row++;
+}
+//--></script>    <script type="text/javascript"><!--
+var video_row = <?php echo $video_row; ?>;
+
+function addVideo() {
+	html  = '<tr id="video-row' + video_row + '">';
+	html += '  <td class="text-right"><input type="text" name="category_video[' + video_row + '][video]" value="" placeholder="https://www.youtube.com/embed/4itETgKvBtE" class="form-control" /></td>';
+	html += '  <td class="text-right"><input type="text" name="category_video[' + video_row + '][sort_order]" value="" placeholder="<?php echo $entry_sort_order; ?>" class="form-control" /></td>';
+	html += '  <td class="text-left"><button type="button" onclick="$(\'#video-row' + video_row  + '\').remove();" data-toggle="tooltip" title="<?php echo $button_remove; ?>" class="btn btn-danger"><i class="fa fa-minus-circle"></i></button></td>';
+	html += '</tr>';
+
+	$('#videos tbody').append(html);
+
+	video_row++;
+}
+//--></script>
   <script type="text/javascript"><!--
 $('#language a:first').tab('show');
 //--></script></div>

@@ -1,5 +1,21 @@
 <?php
 class ModelCatalogCategory extends Model {
+	
+	public function getCategoryImages($category_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_image WHERE category_id = '" . (int)$category_id . "'
+								  ORDER BY sort_order ASC");
+
+		return $query->rows;
+	}
+
+	public function getVideoImages($category_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_video WHERE category_id = '" . (int)$category_id . "'
+								  ORDER BY sort_order ASC");
+
+		return $query->rows;
+	}
+
+	
 	public function addCategory($data) {
 		$this->db->query("INSERT INTO " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (int)$data['column'] . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', date_modified = NOW(), date_added = NOW()");
 
@@ -7,6 +23,12 @@ class ModelCatalogCategory extends Model {
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
+		if (isset($data['style'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET style = '1' WHERE category_id = '" . (int)$category_id . "'");
+		}else{
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET style = '0' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
 		foreach ($data['category_description'] as $language_id => $value) {
@@ -38,6 +60,21 @@ class ModelCatalogCategory extends Model {
 			}
 		}
 
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_image WHERE category_id = '" . (int)$category_id . "'");
+		if (isset($data['category_image'])) {
+			foreach ($data['category_image'] as $category_image) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_image SET category_id = '" . (int)$category_id . "', image = '" . $this->db->escape($category_image['image']) . "', sort_order = '" . (int)$category_image['sort_order'] . "'");
+			}
+		}
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_video WHERE category_id = '" . (int)$category_id . "'");
+		if (isset($data['category_video'])) {
+			foreach ($data['category_video'] as $category_image) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_video SET category_id = '" . (int)$category_id . "', video = '" . $this->db->escape($category_image['video']) . "', sort_order = '" . (int)$category_image['sort_order'] . "'");
+			}
+		}
+
+		
 		// Set which layout to use with this category
 		if (isset($data['category_layout'])) {
 			foreach ($data['category_layout'] as $store_id => $layout_id) {
@@ -59,6 +96,12 @@ class ModelCatalogCategory extends Model {
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
+		}
+
+		if (isset($data['style'])) {
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET style = '1' WHERE category_id = '" . (int)$category_id . "'");
+		}else{
+			$this->db->query("UPDATE " . DB_PREFIX . "category SET style = '0' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
@@ -147,6 +190,21 @@ class ModelCatalogCategory extends Model {
 		if ($data['keyword']) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "url_alias SET query = 'category_id=" . (int)$category_id . "', keyword = '" . $this->db->escape($data['keyword']) . "'");
 		}
+		
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_image WHERE category_id = '" . (int)$category_id . "'");
+		if (isset($data['category_image'])) {
+			foreach ($data['category_image'] as $category_image) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_image SET category_id = '" . (int)$category_id . "', image = '" . $this->db->escape($category_image['image']) . "', sort_order = '" . (int)$category_image['sort_order'] . "'");
+			}
+		}
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_video WHERE category_id = '" . (int)$category_id . "'");
+		if (isset($data['category_video'])) {
+			foreach ($data['category_video'] as $category_image) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "category_video SET category_id = '" . (int)$category_id . "', video = '" . $this->db->escape($category_image['video']) . "', sort_order = '" . (int)$category_image['sort_order'] . "'");
+			}
+		}
+
 
 		$this->cache->delete('category');
 	}
@@ -163,6 +221,8 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_filter WHERE category_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_image WHERE category_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_video WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_store WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "'");
@@ -317,3 +377,4 @@ class ModelCatalogCategory extends Model {
 		return $query->row['total'];
 	}	
 }
+

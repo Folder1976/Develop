@@ -94,6 +94,25 @@ class ControllerProductCategory extends Controller {
 			$this->document->setDescription($category_info['meta_description']);
 			$this->document->setKeywords($category_info['meta_keyword']);
 
+			
+			$data['videos'] = array();
+			$results = $this->model_catalog_category->getCategoryVideos($category_id);
+			foreach ($results as $result) {
+				$data['videos'][] = $result['video'];
+			}
+			
+			$data['images'] = array();
+			$results = $this->model_catalog_category->getCategoryImages($category_id);
+			foreach ($results as $result) {
+				$data['images'][] = array(
+					'popup' => $this->model_tool_image->resize($result['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height')),
+					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get($this->config->get('config_theme') . '_image_additional_width'), $this->config->get($this->config->get('config_theme') . '_image_additional_height'))
+				);
+			}
+
+
+		
+			
 			$data['heading_title'] = $category_info['name'];
 
 			$data['text_refine'] = $this->language->get('text_refine');
@@ -129,7 +148,8 @@ class ControllerProductCategory extends Controller {
 
 			$data['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8');
 			$data['compare'] = $this->url->link('product/compare');
-
+			$data['style'] = $category_info['style'];
+			
 			$url = '';
 
 			if (isset($this->request->get['filter'])) {
@@ -190,11 +210,15 @@ class ControllerProductCategory extends Controller {
 			$data['lates_products'] = array();
 			$results = array();
 			
+			if(isset($_COOKIE['IdProduto'])){
 			$ids = explode(',', $_COOKIE['IdProduto']);
 			foreach($ids as $id){
 				if((int)$id > 0){
 					$results[] = $this->model_catalog_product->getProduct($id);
 				}
+			}
+			}else{
+				$results = array();
 			}
 			
 			foreach ($results as $result) {
