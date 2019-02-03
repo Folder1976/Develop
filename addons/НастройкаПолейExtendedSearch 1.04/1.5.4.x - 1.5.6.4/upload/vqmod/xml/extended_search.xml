@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>ExtendedSearch for Opencart 154x-156x</id>
+	<version>1.04</version>
+	<vqmver>2.1.5</vqmver>
+	<author>AlexDW</author>
+	<file name="catalog/model/catalog/product.php">
+		<operation error="abort">
+		<search position="before" index="false"><![CDATA[
+$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+		if ((!empty($data['filter_name'])) && $this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_attr')) $sql .= " LEFT JOIN " . DB_PREFIX . "product_attribute pa ON (p.product_id = pa.product_id) ";
+// ExtendedSearch END
+			]]></add>
+		</operation>	
+		<operation error="abort">
+		<search position="replace" index="false"><![CDATA[
+$implode[] = "pd.name LIKE '%" . $this->db->escape($word) . "%'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+					$es = " (LCASE(pd.name) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_model')) $es .= " OR LCASE(p.model) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_sku'))$es .= " OR LCASE(p.sku) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_upc'))$es .= " OR LCASE(p.upc) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_ean'))$es .= " OR LCASE(p.ean) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_jan'))$es .= " OR LCASE(p.jan) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_isbn'))$es .= " OR LCASE(p.isbn) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_mpn'))$es .= " OR LCASE(p.mpn) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_location'))$es .= " OR LCASE(p.location) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+				if ($this->config->get('extendedsearch_status') && $this->config->get('extendedsearch_attr'))$es .= " OR LCASE(pa.text) LIKE '%" . $this->db->escape(utf8_strtolower($word)) . "%'";
+					$es .= ") ";
+					$implode[] = $es;
+// ExtendedSearch END
+			]]></add>
+		</operation>
+	</file>
+
+	<file name="catalog/model/catalog/product.php">		
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_model')) {
+				$sql .= " OR LCASE(p.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.sku) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_sku')) {
+				$sql .= " OR LCASE(p.sku) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.upc) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_upc')) {
+				$sql .= " OR LCASE(p.upc) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.ean) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_ean')) {
+				$sql .= " OR LCASE(p.ean) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.jan) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_jan')) {
+				$sql .= " OR LCASE(p.jan) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.isbn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_isbn')) {
+				$sql .= " OR LCASE(p.isbn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+
+		<operation error="skip">
+		<search position="replace" index="false"><![CDATA[
+$sql .= " OR LCASE(p.mpn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			]]></search>
+			<add><![CDATA[
+// ExtendedSearch
+			if (!$this->config->get('extendedsearch_status') && !$this->config->get('extendedsearch_mpn')) {
+				$sql .= " OR LCASE(p.mpn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+			}
+// ExtendedSearch END
+			]]></add>
+		</operation>
+	</file>
+</modification>

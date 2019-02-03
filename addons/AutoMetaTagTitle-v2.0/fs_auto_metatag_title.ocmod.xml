@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<code>fs_auto_metatag_title</code>
+	<name>Auto MetaTag Title</name>
+	<version>2.0</version>
+	<author>Fabio Messina - fabiome77@hotmail.it</author>
+	<link>http://www.fabiom7.com</link>
+
+<file path="admin/view/template/catalog/product_form.tpl">
+	<operation>
+		<search><![CDATA[
+		<?php echo $footer; ?>
+		]]></search>
+		<add position="before"><![CDATA[
+		<script type="text/javascript"><!--
+		<?php foreach ($languages as $language) { ?>
+		$('#input-name<?php echo $language['language_id']; ?>').on({
+			'keydown': function() {
+				$('#input-meta-title<?php echo $language['language_id']; ?>').css('border-color', '#F60');
+			},
+			'keyup': function() {
+				$('#input-meta-title<?php echo $language['language_id']; ?>').val($(this).val()).css('border-color', '');
+			}
+		});
+		<?php } ?>
+		//--></script>
+		]]></add>
+	</operation>
+</file>
+</modification>

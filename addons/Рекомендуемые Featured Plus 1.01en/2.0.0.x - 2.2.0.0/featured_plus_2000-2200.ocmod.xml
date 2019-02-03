@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name>Featured Plus [2000-2200]</name>
+	<version>1.01</version>
+	<author>AlexDW</author>
+	<link>https://www.opencart.com/index.php?route=marketplace/extension&amp;filter_member=AlexDW</link>
+	<code>featured-plus-adw</code>
+	<file path="admin/controller/module/featured.php">
+		<operation error="abort">
+		<search><![CDATA[
+if (isset($this->request->post['status']))
+			]]></search>
+			<add position="before" ><![CDATA[
+// Featured+
+		$data['text_titles'] = $this->language->get('text_titles');
+		$data['text_shuffle'] = $this->language->get('text_shuffle');
+
+		if (isset($this->request->post['titles'])) {
+			$data['titles'] = $this->request->post['titles'];
+		} elseif (!empty($module_info) && isset($module_info['titles'])) {
+			$data['titles'] = $module_info['titles'];
+		} else {
+			$data['titles'] = array();
+		}
+
+		if (isset($this->request->post['shuffle'])) {
+			$data['shuffle'] = $this->request->post['shuffle'];
+		} elseif (!empty($module_info) && isset($module_info['shuffle'])) {
+			$data['shuffle'] = 1;
+		} else {
+			$data['shuffle'] = 0;
+		}
+
+		$this->load->model('localisation/language');
+		$data['languages'] = $this->model_localisation_language->getLanguages();
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/view/template/module/featured.tpl">
+		<operation error="abort">
+		<search index="1"><![CDATA[
+<div class="form-group">
+			]]></search>
+			<add position="before"><![CDATA[
+<!-- Featured+ -->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-titles"><?php echo $text_titles; ?></label>
+            <div class="col-sm-10">
+              <?php foreach ($languages as $language) { ?>
+              <div class="input-group"><span class="input-group-addon">
+			  <?php if (VERSION >= '2.2') { ?>
+			  <img src="language/<?php echo $language['code']; ?>/<?php echo $language['code']; ?>.png" title="<?php echo $language['name']; ?>" />
+			  <?php } else { ?>
+			  <img src="view/image/flags/<?php echo $language['image']; ?>" title="<?php echo $language['name']; ?>" />
+			  <?php } ?>
+			  </span>
+                <input type="text" name="titles[title<?php echo $language['language_id']; ?>]" value="<?php echo isset($titles['title'.$language['language_id']]) ? $titles['title'.$language['language_id']] : ''; ?>" placeholder="<?php echo $text_titles; ?>" class="form-control" />
+              </div>
+              <?php } ?>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-shuffle"><?php echo $text_shuffle; ?></label>
+            <div class="col-sm-10">
+              <div class="checkbox">
+                <label>
+                <?php if ($shuffle) { ?>
+                <input type="checkbox" name="shuffle" value="1" checked="checked" id="input-shuffle" />
+                <?php } else { ?>
+                <input type="checkbox" name="shuffle" value="1" id="input-shuffle" />
+                <?php } ?>
+                </label>
+              </div>
+            </div>
+          </div>
+<!-- Featured+ -->
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/module/featured.php">
+		<operation error="abort">
+		<search><![CDATA[
+$products =
+			]]></search>
+			<add position="before" ><![CDATA[
+// Featured+
+		$lang = $this->config->get('config_language_id');
+		$title = isset($setting['titles']['title'.$lang]) && $setting['titles']['title'.$lang] ? $setting['titles']['title'.$lang] : '';
+
+		if (isset($title) && $title) {
+			$data['heading_title'] = $title;
+		}
+
+		if (isset($setting['shuffle']) && $setting['shuffle']) {
+			shuffle($setting['product']);
+		}
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/language/en-gb/module/featured.php">		
+		<operation error="skip">
+			<search><![CDATA[
+<?php
+			]]></search>
+			<add position="after"><![CDATA[
+// Featured+
+$_['text_titles']	= 'Header';
+$_['text_shuffle']	= 'Shuffle';
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/language/english/module/featured.php">		
+		<operation error="skip">
+			<search><![CDATA[
+<?php
+			]]></search>
+			<add position="after"><![CDATA[
+// Featured+
+$_['text_titles']	= 'Header';
+$_['text_shuffle']	= 'Shuffle';
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/language/ru-ru/module/featured.php">		
+		<operation error="skip">
+			<search><![CDATA[
+<?php
+			]]></search>
+			<add position="after"><![CDATA[
+// Featured+
+$_['text_titles']	= 'Заголовок';
+$_['text_shuffle']	= 'Случайный порядок';
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/language/russian/module/featured.php">		
+		<operation error="skip">
+			<search><![CDATA[
+<?php
+			]]></search>
+			<add position="after"><![CDATA[
+// Featured+
+$_['text_titles']	= 'Заголовок';
+$_['text_shuffle']	= 'Случайный порядок';
+// Featured+
+			]]></add>
+		</operation>
+	</file>
+</modification>

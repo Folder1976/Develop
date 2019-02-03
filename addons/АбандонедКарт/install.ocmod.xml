@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name>Слежение за ошибочными заказами</name>
+	<version>1.0.1</version>
+	<author>admin@e-45.ru - заказ расширенной версии</author>
+	<link>http://e-45.ru/url/articles/lostorders</link>
+	<code>lostorders</code>
+	<file path="admin/model/sale/order.php">
+		<operation error="skip">
+		    <search><![CDATA[
+			$sql .= " WHERE o.order_status_id > '0'";
+		    ]]>
+		    </search>
+		    <add position="replace"><![CDATA[
+			$sql .= " WHERE o.order_status_id >= '0'";
+		    ]]></add>
+		</operation>
+		
+		<operation error="skip">
+		    <search><![CDATA[
+			$sql .= " WHERE order_status_id > '0'";
+		    ]]>
+		    </search>
+		    <add position="replace"><![CDATA[
+			$sql .= " WHERE order_status_id >= '0'";
+		    ]]></add>
+		</operation>
+	</file>
+</modification>
