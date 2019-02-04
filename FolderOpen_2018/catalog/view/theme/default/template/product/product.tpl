@@ -1,29 +1,43 @@
 <?php echo $header; ?>
 <?php
 if(!isset($_COOKIE['IdProduto'])){
-$id_como_string = (string)$product_id;
-$id_como_string .= ',';
-setcookie('IdProduto',$id_como_string,time() + 34560000, "/");
-}
-else {
-$id_como_string = (string)$product_id;
-$array_produtos = $_COOKIE['IdProduto'];
-if(strpos($array_produtos,','.$id_como_string.',')==strlen($array_produtos)-strlen($id_como_string)-2){   
-}		
-else if(strpos($array_produtos,$id_como_string.',') === 0){ 
-$array_produtos = str_replace($id_como_string.',','',$array_produtos);
-$array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
-}
-else if(strpos($array_produtos,','.$id_como_string.',') !== false){ 
-$array_produtos = str_replace($id_como_string.',','',$array_produtos);
-$array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
-}
-else {  
-$array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
-}
+    $id_como_string = (string)$product_id;
+    $id_como_string .= ',';
+    setcookie('IdProduto',$id_como_string,time() + 34560000, "/");
+}else {
+    $id_como_string = (string)$product_id;
+    $array_produtos = $_COOKIE['IdProduto'];
+    
+    if(strpos($array_produtos,','.$id_como_string.',')==strlen($array_produtos)-strlen($id_como_string)-2){   
+    
+    } else if(strpos($array_produtos,$id_como_string.',') === 0){ 
+      $array_produtos = str_replace($id_como_string.',','',$array_produtos);
+      $array_produtos .= $id_como_string . ',';
+      setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+    
+    }else if(strpos($array_produtos,','.$id_como_string.',') !== false){ 
+      $array_produtos = str_replace($id_como_string.',','',$array_produtos);
+      $array_produtos .= $id_como_string . ',';
+      setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+    }else {  
+      $array_produtos .= $id_como_string . ',';
+      setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+    }
+    
+    //Обрезка
+    $limit = 9;
+    $arr = explode(',', trim($array_produtos,','));
+    $new_arr = array();
+    
+    while($limit>0 AND count($arr)){
+      $new_arr[] = array_pop($arr);
+      $limit--;
+    }
+    
+    $new_arr = array_reverse($new_arr);
+    
+    $array_produtos = implode(',', $new_arr) . ',';
+    setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
 }
 ?>
 <div class="container">

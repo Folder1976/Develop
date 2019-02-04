@@ -1,0 +1,26 @@
+Скопировать на сервак
+
+Хедер
+<script src="/catalog/view/javascript/callback.js" type="text/javascript"></script>
+<link href="/catalog/view/theme/default/stylesheet/callback.css" rel="stylesheet" type="text/css" />
+
+
+Кпопку вставляем там
+
+В продукт
+              <button type="button" class="btn btn--transparent btn--dib btn--buy-click uptocall-mini-phone"
+                    data-src="<?php echo $thumb; ?>"
+                    data-name="<?php echo $heading_title; ?>"
+                    data-price="<?php echo $price; ?>"
+                    >Купить в 1 клик</button>
+
+
+
+
+В списки
+
+<button type="button" class="btn btn--transparent btn--dib btn--buy-click uptocall-mini-phone"
+                    data-src="<?php echo $product['thumb']; ?>"
+                    data-name="<?php echo $product['name']; ?>"
+                    data-price="<?php echo $product['price']; ?>"
+                    >Купить в 1 клик</button>

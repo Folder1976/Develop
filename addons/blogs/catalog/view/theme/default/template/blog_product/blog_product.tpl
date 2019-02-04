@@ -1,28 +1,28 @@
 <?php echo $header; ?>
 <?php
-if(!isset($_COOKIE['IdProduto'])){
+if(!isset($_COOKIE['IdProdutoBlog'])){
 $id_como_string = (string)$blog_product_id;
 $id_como_string .= ',';
-setcookie('IdProduto',$id_como_string,time() + 34560000, "/");
+setcookie('IdProdutoBlog',$id_como_string,time() + 34560000, "/");
 }
 else {
 $id_como_string = (string)$blog_product_id;
-$array_produtos = $_COOKIE['IdProduto'];
+$array_produtos = $_COOKIE['IdProdutoBlog'];
 if(strpos($array_produtos,','.$id_como_string.',')==strlen($array_produtos)-strlen($id_como_string)-2){   
 }		
 else if(strpos($array_produtos,$id_como_string.',') === 0){ 
 $array_produtos = str_replace($id_como_string.',','',$array_produtos);
 $array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+setcookie('IdProdutoBlog',$array_produtos,time() + 34560000, "/");
 }
 else if(strpos($array_produtos,','.$id_como_string.',') !== false){ 
 $array_produtos = str_replace($id_como_string.',','',$array_produtos);
 $array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+setcookie('IdProdutoBlog',$array_produtos,time() + 34560000, "/");
 }
 else {  
 $array_produtos .= $id_como_string . ',';
-setcookie('IdProduto',$array_produtos,time() + 34560000, "/");
+setcookie('IdProdutoBlog',$array_produtos,time() + 34560000, "/");
 }
 }
 ?>

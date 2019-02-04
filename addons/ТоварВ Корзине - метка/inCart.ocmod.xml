@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+<name>InCart Marks</name>
+<code>InCart Marks</code>
+<version>1.0</version>
+<author>https://skillcode.ru/</author>
+
+<file path="catalog/controller/product/category.php">
+	<operation>
+		<search><![CDATA[$this->load->model('catalog/product');]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			$products = $this->cart->getProducts();
+			$cart_products = array();
+			if($products){
+				foreach($products as $row){
+					$cart_products[] = $row['product_id'];
+				}
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="before" error="skip"><![CDATA[
+			//Folder - InCart
+			$in_cart = false;
+			if(in_array($result['product_id'], $cart_products)){
+				$in_cart = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			'in_cart'	=> $in_cart,
+			//Folder - InCart
+		]]></add>
+	</operation>
+
+
+	<operation>
+		<search><![CDATA[$data['lates_products'][] = array(]]></search>
+		<add position="before" error="skip"><![CDATA[
+			//Folder - InCart
+			$in_cart = false;
+			if(in_array($result['product_id'], $cart_products)){
+				$in_cart = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['lates_products'][] = array(]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			'in_cart'	=> $in_cart,
+			//Folder - InCart
+		]]></add>
+	</operation>
+</file>
+
+
+<file path="catalog/controller/product/product.php">
+	<operation>
+		<search><![CDATA[$this->load->model('catalog/product');]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			$products = $this->cart->getProducts();
+			$cart_products = array();
+			if($products){
+				foreach($products as $row){
+					$cart_products[] = $row['product_id'];
+				}
+			}
+			
+			$data['in_cart'] = false;
+			if(in_array($product_id, $cart_products)){
+				$data['in_cart'] = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="before" error="skip"><![CDATA[
+			//Folder - InCart
+			$in_cart = false;
+			if(in_array($result['product_id'], $cart_products)){
+				$in_cart = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			'in_cart'	=> $in_cart,
+			//Folder - InCart
+		]]></add>
+	</operation>
+
+
+	<operation>
+		<search><![CDATA[$data['lates_products'][] = array(]]></search>
+		<add position="before" error="skip"><![CDATA[
+			//Folder - InCart
+			$in_cart = false;
+			if(in_array($result['product_id'], $cart_products)){
+				$in_cart = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['lates_products'][] = array(]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			'in_cart'	=> $in_cart,
+			//Folder - InCart
+		]]></add>
+	</operation>
+</file>
+
+
+
+<file path="catalog/controller/extension/module/featured.php">
+	<operation>
+		<search><![CDATA[$this->load->model('catalog/product');]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			$products = $this->cart->getProducts();
+			$cart_products = array();
+			if($products){
+				foreach($products as $row){
+					$cart_products[] = $row['product_id'];
+				}
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="before" error="skip"><![CDATA[
+			//Folder - InCart
+			$in_cart = false;
+			if(in_array($product_info['product_id'], $cart_products)){
+				$in_cart = true;
+			}
+			//Folder - InCart
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[$data['products'][] = array(]]></search>
+		<add position="after" error="skip"><![CDATA[
+			//Folder - InCart
+			'in_cart'	=> $in_cart,
+			//Folder - InCart
+		]]></add>
+	</operation>
+</file>
+</modification>

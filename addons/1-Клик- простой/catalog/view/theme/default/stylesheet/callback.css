@@ -1,0 +1,135 @@
+body.overflow-hidden {
+	overflow: hidden;
+}
+
+#order-form {
+	position: fixed;
+	overflow: auto;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+	width: 100%;
+	height: 100%;
+	padding: 50px 15px;
+	background-color: rgba(51,51,51,.9);
+}
+
+#order-form form {
+	display: block;
+	position: relative;
+	max-width: 480px;
+	margin: auto;
+	border: 1px solid #888;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+#order-form .header {
+	padding: 15px;
+	background-color: #ddd;
+}
+#order-form .title {
+	margin: 0;
+}
+#order-form .close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 48px;
+	height: 48px;
+	cursor: pointer;
+}
+#order-form .close-button::before,
+#order-form .close-button::after {
+	content: '';
+	position: absolute;
+	top: 23px;
+	left: 14px;
+	width: 20px;
+	height: 2px;
+	background-color: #888;
+}
+#order-form .close-button::before {
+	-webkit-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+#order-form .close-button::after {
+	-webkit-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+}
+
+#order-form .content {
+	padding: 15px;
+	background-color: #fff;
+}
+
+#order-form .top {
+	padding-bottom: 15px;
+	border-bottom: 1px dotted #ccc;
+	text-align: center;
+}
+
+#order-form .img {
+	width: 100px;
+}
+
+#order-form .calculator {
+	display: inline-block;
+	vertical-align: middle;
+	width: 100%;
+	max-width: 344px;
+	padding: 15px;
+	text-align: left;
+}
+
+#order-form .text {
+	margin-right: 1em;
+}
+
+#order-form .sum,
+#order-form .curency {
+	font-size: 20px;
+	color: red;
+}
+
+#order-form .value {
+	margin: 1em 0;
+}
+
+#order-form [name="value"] {
+	width: 4em;
+	text-align: right;
+}
+
+#order-form .contacts {
+	
+}
+
+#order-form .input-group {
+	margin: 2em 0;
+}
+
+#order-form label {
+	width: 115px;
+	vertical-align: top;
+}
+#order-form label.required::after {
+	content: '*';
+	color: red;
+}
+
+#order-form input,
+#order-form textarea {
+	width: 100%;
+	max-width: 333px;
+}
+
+#order-form .button-wrapper {
+	text-align: center;
+}
+
+#order-form .disclamer {
+	font-style: italic;
+	margin: 2em 0 1em;
+	text-align: center;
+}
