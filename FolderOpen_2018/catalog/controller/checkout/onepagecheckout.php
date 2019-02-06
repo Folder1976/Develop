@@ -422,8 +422,15 @@ class ControllerCheckoutOnepagecheckout extends Controller
                  // var_dump($this->session->data['payment_method']);exit;
 
                 $json['payment'] = $this->load->controller('extension/payment/' . $this->session->data['payment_method']['code']);
-                if($this->session->data['payment_method']['code']=='cod')
-                $json['cod'] = 1;
+              if($this->session->data['payment_method']['code']=='cod') $json['cod'] = 1;
+                if($this->session->data['payment_method']['code']=='cod1') $json['cod1'] = 1;
+                if($this->session->data['payment_method']['code']=='cod2') $json['cod2'] = 1;
+                if($this->session->data['payment_method']['code']=='cod3') $json['cod3'] = 1;
+                if($this->session->data['payment_method']['code']=='cod4') $json['cod4'] = 1;
+                if($this->session->data['payment_method']['code']=='cod5') $json['cod5'] = 1;
+                if($this->session->data['payment_method']['code']=='cod6') $json['cod6'] = 1;
+                if($this->session->data['payment_method']['code']=='cod7') $json['cod7'] = 1;
+                if($this->session->data['payment_method']['code']=='cod8') $json['cod8'] = 1;
             } else
                 $json['error'] = $this->errors;
 
