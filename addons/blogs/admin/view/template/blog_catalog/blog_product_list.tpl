@@ -138,7 +138,12 @@
                     <?php } else { ?>
                     <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>
                     <?php } ?></td>
-                  <td class="text-left"><?php echo $product['name']; ?></td>
+                  <td class="text-left"><b><?php echo $product['name']; ?></b>
+                    <?php foreach($product['categories'] as $category){ ?>
+                      <br><i><?php echo $category['name']; ?></i>
+                    <?php } ?>
+                  
+                  </td>
                   <td class="text-left"><?php echo $product['model']; ?></td>
                   <td class="text-right"><?php if ($product['special']) { ?>
                     <span style="text-decoration: line-through;"><?php echo $product['price']; ?></span><br/>

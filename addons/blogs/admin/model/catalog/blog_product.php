@@ -366,7 +366,10 @@ class ModelCatalogBlogProduct extends Model {
 	}
 
 	public function getProducts($data = array()) {
-		$sql = "SELECT * FROM " . DB_PREFIX . "blog_product p LEFT JOIN " . DB_PREFIX . "blog_product_description pd ON (p.blog_product_id = pd.blog_product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$sql = "SELECT * FROM " . DB_PREFIX . "blog_product p
+		LEFT JOIN " . DB_PREFIX . "blog_product_description pd ON (p.blog_product_id = pd.blog_product_id)
+		LEFT JOIN " . DB_PREFIX . "blog_product_to_category p2c ON (p.blog_product_id = p2c.blog_product_id) 
+		WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_name'])) {
 			$sql .= " AND pd.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
@@ -408,9 +411,9 @@ class ModelCatalogBlogProduct extends Model {
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			$sql .= " ORDER BY p2c.blog_category_id, " . $data['sort'];
 		} else {
-			$sql .= " ORDER BY pd.name";
+			$sql .= " ORDER BY p2c.blog_category_id,  pd.name";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -468,6 +471,21 @@ class ModelCatalogBlogProduct extends Model {
 
 		foreach ($query->rows as $result) {
 			$product_category_data[] = $result['blog_category_id'];
+		}
+
+		return $product_category_data;
+	}
+
+	public function getProductCategoriesWName($blog_product_id) {
+		$product_category_data = array();
+
+		$query = $this->db->query("SELECT cd.blog_category_id, cd.name FROM " . DB_PREFIX . "blog_product_to_category p2c
+								  LEFT JOIN " . DB_PREFIX . "blog_category_description cd ON cd.blog_category_id = p2c.blog_category_id 
+									WHERE p2c.blog_product_id = '" . (int)$blog_product_id . "' AND  cd.language_id = '" . (int)$this->config->get('config_language_id') . "'" );
+
+									
+		foreach ($query->rows as $result) {
+			$product_category_data[] = $result;
 		}
 
 		return $product_category_data;
@@ -735,4 +753,5 @@ class ModelCatalogBlogProduct extends Model {
 		return $query->row['total'];
 	}
 }
+
 

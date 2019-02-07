@@ -379,6 +379,7 @@ class ControllerCatalogBlogProduct extends Controller {
 				'name'       => $result['name'],
 				'model'      => $result['model'],
 				'price'      => $result['price'],
+				'categories' => $this->model_catalog_blog_product->getProductCategoriesWName($result['blog_product_id']),
 				'special'    => $special,
 				'quantity'   => $result['quantity'],
 				'status'     => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
@@ -1477,4 +1478,5 @@ class ControllerCatalogBlogProduct extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 }
+
 
