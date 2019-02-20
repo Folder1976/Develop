@@ -73,7 +73,7 @@
 						
 						<a class="filter-group__title"><?php echo $filter_group['name']; ?></a>
             <div class="filter-group__content">
-              <div id="filter-group<?php echo $filter_group['filter_group_id']; ?>">
+              <div id="filter-group<?php echo $filter_group_id; ?>">
 
                 <?php foreach ($filter_attributes[$filter_group_id] as $filter) { ?>
                 <div class="filter-item">
