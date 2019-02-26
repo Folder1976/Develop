@@ -20,7 +20,14 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 
 			$products = $this->model_catalog_product->getProducts();
 
+			
+			
 			foreach ($products as $product) {
+				
+				if(date('Y', strtotime($product['date_modified']) < 2018)){
+					$product['date_modified'] = $product['date_added'];
+				}
+
 				if ($product['image']) {
 					$output .= '<url>'."\n";
 					$output .= '<loc>' . $this->url->link('product/product', 'product_id=' . $product['product_id']) . '</loc>'."\n";
