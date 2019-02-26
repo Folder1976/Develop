@@ -164,6 +164,13 @@ class ControllerCommonColumnLeft extends Controller {
 				);					
 			}
 			*/
+			if ($this->user->hasPermission('access', 'extension/extension')) {		
+				$extension[] = array(
+					'name'	   => 'Генерить СайтМап',
+					'href'     => '/index.php?route=extension/feed/google_sitemap',
+					'children' => array()
+				);
+			}
 			if ($this->user->hasPermission('access', 'extension/installer')) {		
 				$extension[] = array(
 					'name'	   => $this->language->get('text_installer'),

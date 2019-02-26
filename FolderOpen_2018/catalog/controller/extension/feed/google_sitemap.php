@@ -1,9 +1,19 @@
 <?php
 class ControllerExtensionFeedGoogleSitemap extends Controller {
 	public function index() {
+		
+		
+		
+		ini_set('error_reporting', E_ALL);
+		ini_set('display_errors', 1);
+		ini_set('display_startup_errors', 1);
+		set_time_limit(0);
+		$count = 1;
+		$file = 'sitemap.xml';
+
 		if ($this->config->get('google_sitemap_status')) {
-			$output  = '<?xml version="1.0" encoding="UTF-8"?>';
-			$output .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">';
+			$output  = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+			$output .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\n";
 
 			$this->load->model('catalog/product');
 			$this->load->model('tool/image');
@@ -12,18 +22,25 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 
 			foreach ($products as $product) {
 				if ($product['image']) {
-					$output .= '<url>';
-					$output .= '<loc>' . $this->url->link('product/product', 'product_id=' . $product['product_id']) . '</loc>';
-					$output .= '<changefreq>weekly</changefreq>';
-					$output .= '<lastmod>' . date('Y-m-d\TH:i:sP', strtotime($product['date_modified'])) . '</lastmod>';
-					$output .= '<priority>1.0</priority>';
-					$output .= '<image:image>';
-					$output .= '<image:loc>' . $this->model_tool_image->resize($product['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height')) . '</image:loc>';
-					$output .= '<image:caption>' . $product['name'] . '</image:caption>';
-					$output .= '<image:title>' . $product['name'] . '</image:title>';
-					$output .= '</image:image>';
-					$output .= '</url>';
+					$output .= '<url>'."\n";
+					$output .= '<loc>' . $this->url->link('product/product', 'product_id=' . $product['product_id']) . '</loc>'."\n";
+					$output .= '<changefreq>weekly</changefreq>'."\n";
+					$output .= '<lastmod>' . date('Y-m-d\TH:i:sP', strtotime($product['date_modified'])) . '</lastmod>'."\n";
+					$output .= '<priority>1.0</priority>'."\n";
+					$output .= '<image:image>'."\n";
+					$output .= '<image:loc>' . $this->model_tool_image->resize($product['image'], $this->config->get($this->config->get('config_theme') . '_image_popup_width'), $this->config->get($this->config->get('config_theme') . '_image_popup_height')) . '</image:loc>'."\n";
+					$output .= '<image:caption>' . $product['name'] . '</image:caption>'."\n";
+					$output .= '<image:title>' . $product['name'] . '</image:title>'."\n";
+					$output .= '</image:image>'."\n";
+					$output .= '</url>'."\n";
 				}
+				
+				if($count++ > 500){
+					$count = 1;
+					sleep(2);
+				}
+				
+				
 			}
 
 			$this->load->model('catalog/category');
@@ -35,20 +52,25 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 			$manufacturers = $this->model_catalog_manufacturer->getManufacturers();
 
 			foreach ($manufacturers as $manufacturer) {
-				$output .= '<url>';
-				$output .= '<loc>' . $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $manufacturer['manufacturer_id']) . '</loc>';
-				$output .= '<changefreq>weekly</changefreq>';
-				$output .= '<priority>0.7</priority>';
-				$output .= '</url>';
+				$output .= '<url>'."\n";
+				$output .= '<loc>' . $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $manufacturer['manufacturer_id']) . '</loc>'."\n";
+				$output .= '<changefreq>weekly</changefreq>'."\n";
+				$output .= '<priority>0.7</priority>'."\n";
+				$output .= '</url>'."\n";
 
 				$products = $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => $manufacturer['manufacturer_id']));
 
 				foreach ($products as $product) {
-					$output .= '<url>';
-					$output .= '<loc>' . $this->url->link('product/product', 'manufacturer_id=' . $manufacturer['manufacturer_id'] . '&product_id=' . $product['product_id']) . '</loc>';
-					$output .= '<changefreq>weekly</changefreq>';
-					$output .= '<priority>1.0</priority>';
-					$output .= '</url>';
+					$output .= '<url>'."\n";
+					$output .= '<loc>' . $this->url->link('product/product', 'manufacturer_id=' . $manufacturer['manufacturer_id'] . '&product_id=' . $product['product_id']) . '</loc>'."\n";
+					$output .= '<changefreq>weekly</changefreq>'."\n";
+					$output .= '<priority>1.0</priority>'."\n";
+					$output .= '</url>'."\n";
+					
+					if($count++ > 500){
+						$count = 1;
+						sleep(2);
+					}
 				}
 			}
 
@@ -57,17 +79,25 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 			$informations = $this->model_catalog_information->getInformations();
 
 			foreach ($informations as $information) {
-				$output .= '<url>';
-				$output .= '<loc>' . $this->url->link('information/information', 'information_id=' . $information['information_id']) . '</loc>';
-				$output .= '<changefreq>weekly</changefreq>';
-				$output .= '<priority>0.5</priority>';
-				$output .= '</url>';
+				$output .= '<url>'."\n";
+				$output .= '<loc>' . $this->url->link('information/information', 'information_id=' . $information['information_id']) . '</loc>'."\n";
+				$output .= '<changefreq>weekly</changefreq>'."\n";
+				$output .= '<priority>0.5</priority>'."\n";
+				$output .= '</url>'."\n";
+				
+				if($count++ > 500){
+					$count = 1;
+					sleep(2);
+				}
+				
 			}
 
 			$output .= '</urlset>';
 
-			$this->response->addHeader('Content-Type: application/xml');
-			$this->response->setOutput($output);
+			//$this->response->addHeader('Content-Type: application/xml');
+			//$this->response->setOutput($output);
+			//$current = file_get_contents($file);
+			file_put_contents($file, $output);
 		}
 	}
 
@@ -105,3 +135,4 @@ class ControllerExtensionFeedGoogleSitemap extends Controller {
 		return $output;
 	}
 }
+
