@@ -274,19 +274,19 @@
       </search>
       <add position="before">
         <![CDATA[
+require_once DIR_APPLICATION . 'model/extension/module/watermark/image.watermark.php';
 		/*
 class ModelToolImage extends Model {
         ]]>
       </add>
     </operation>
     <operation>
-      <search index="10">
+      <search index="12">
         <![CDATA[}]]>
       </search>
       <add position="after">
         <![CDATA[
         */
-		require_once DIR_APPLICATION . 'model/extension/module/watermark/image.watermark.php';
         ]]>
       </add>
     </operation>

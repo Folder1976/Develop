@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <code>Related Options2</code>
+    <name>Related Options2 / Связанные опции</name>
+    <version>2.3.0</version>
+    <author>Folder</author>
+    <link>https://skillcode.ru/</link>
+
+
+	
+
+	
+	<!-- fastor theme integrated live price updating -->
+	<file name="catalog/controller/product/liveprice.php" error="skip">
+		
+		<operation error="skip"> 
+      <search position="after"><![CDATA[$product_info = $this->model_catalog_product->getProduct($product_id);]]></search>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+
+			if ( !$this->model_extension_module_related_options ) {
+				$this->load->model('extension/module/related_options');
+			}
+			$ro_settings = $this->config->get('related_options');
+			$ro_installed = $this->model_extension_module_related_options->installed();
+			
+			if ($ro_installed && $product_info) {
+			
+				$ro_combs = $this->model_extension_module_related_options->get_related_options_sets_by_poids($product_id, $this->request->post['option'], true);
+				$ro_price_data = $this->model_extension_module_related_options->calc_price_with_ro($product_info['price'], $ro_combs, $product_info['special']);
+				$product_info['price'] = $ro_price_data['price'];
+				$product_info['special'] = $ro_price_data['special']; // however the theme price updater does not support correct update of specials
+			}
+			
+			// >> Related Options / Связанные опции
+			]]></add>
+		</operation>
+		
+	</file>
+	
+	<file name="catalog/model/module/liveprice.php" error="skip">
+		
+		<operation error="log">
+      <search position="after"><![CDATA[if ($product_query->num_rows) {]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << Related Options / Связанные опции  
+
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( !$this->model_extension_module_related_options ) {
+					$this->load->model('extension/module/related_options');
+				}
+				$ro_settings = $this->config->get('related_options');
+				$ro_installed = $this->model_extension_module_related_options->installed();
+				
+				if ($ro_installed) {
+				
+					$ro_combs = $this->model_extension_module_related_options->get_related_options_sets_by_poids($product_id, $options, true);
+					
+					if ($ro_combs) {
+						foreach ($ro_combs as $ro_comb) {
+							if (isset($ro_settings['spec_weight']) && $ro_settings['spec_weight'] && $ro_comb['weight'] != 0) {
+								if ($ro_comb['weight_prefix'] == '+') {
+									$product_query->row['weight'] += $ro_comb['weight'];
+								} elseif ($ro_comb['weight_prefix'] == '-') {
+									$product_query->row['weight'] -= $ro_comb['weight'];
+								} else { // =
+									$product_query->row['weight'] = $ro_comb['weight'];
+								}
+							}
+						}
+					}
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		
+		
+		<!-- << Live price before OpenCart 2.2 (before Live Price 2.1.5) -->
+		<operation error="skip">
+			<search position="before"><![CDATA[$price_rewrited = $this->calculateOptionPrice($option_price, (int)$product_id, $product_query->row['price']]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+      <!-- <search position="after"><![CDATA[$price = $product_query->row['price'];]]></search> -->
+			<add><![CDATA[
+			// << Related Options / Связанные опции
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( $ro_installed && isset($ro_settings['spec_price']) && $ro_settings['spec_price'] ) {
+					if ($ro_combs) {
+						
+						$ro_price_data = $this->model_extension_module_related_options->calc_price_with_ro($product_query->row['price'], $ro_combs);
+						$product_query->row['price'] = $ro_price_data['price'];
+						$ro_price_modificator = $ro_price_data['price_modificator'];
+						$ro_special_temp = $ro_price_data['special'];
+						$ro_stock_temp = $ro_price_data['stock'];
+						//$price = $this->model_extension_module_related_options->calc_price_with_ro($price, $ro_combs);
+					}
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		<operation error="skip">
+      <search position="after"><![CDATA[$price_rewrited = $this->calculateOptionPrice($option_price, (int)$product_id, $product_query->row['price']]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << << Related Options / Связанные опции 
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ($price_rewrited && isset($ro_price_modificator) && $ro_price_modificator!=0 ) {
+					$product_query->row['price'] = $product_query->row['price'] + $ro_price_modificator;
+				}
+			}
+			// >> Related Options / Связанные опции 
+			]]></add>
+		</operation>
+		<!-- >> Live price before OpenCart 2.2 (before Live Price 2.1.5) -->
+		
+		<!-- << Live price after(from) OpenCart 2.2 (from Live Price 2.1.5) -->
+		<operation error="skip">
+			<search position="before"><![CDATA[$calc_data = $this->calculateOptionPrice( $option_price, (int)$product_id, $product_query->row['price']]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+      <!-- <search position="after"><![CDATA[$price = $product_query->row['price'];]]></search> -->
+			<add><![CDATA[
+			// << Related Options / Связанные опции
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( $ro_installed && isset($ro_settings['spec_price']) && $ro_settings['spec_price'] ) {
+					if ($ro_combs) {
+						$ro_price_data = $this->model_extension_module_related_options->calc_price_with_ro($product_query->row['price'], $ro_combs);
+						$product_query->row['price'] = $ro_price_data['price'];
+						$ro_price_modificator = $ro_price_data['price_modificator'];
+						$ro_special_temp = $ro_price_data['special'];
+						$ro_stock_temp = $ro_price_data['stock'];
+						//$price = $this->model_extension_module_related_options->calc_price_with_ro($price, $ro_combs);
+					}
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		<operation error="skip">
+      <search position="after"><![CDATA[$calc_data = $this->calculateOptionPrice( $option_price, (int)$product_id, $product_query->row['price']]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ($calc_data['price_rewrited'] && isset($ro_price_modificator) && $ro_price_modificator!=0 ) {
+					$product_query->row['price'] = $product_query->row['price'] + $ro_price_modificator;
+				}
+			}
+			// >> Related Options / Связанные опции 
+			]]></add>
+		</operation>
+		<!-- >> Live price after(from) OpenCart 2.2 (from Live Price 2.1.5) -->
+		
+		<operation error="log">
+      <search position="before"><![CDATA[if ($product_discount_query->num_rows) {]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( $ro_installed && isset($ro_settings['spec_price']) && $ro_settings['spec_price'] && isset($ro_settings['spec_price_discount']) && $ro_settings['spec_price_discount'] ) {
+					if ($ro_combs) {
+						foreach ($ro_combs as $ro_comb) {
+							$ro_discount_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "relatedoptions_discount
+																												WHERE relatedoptions_id = '" . (int)$ro_comb['relatedoptions_id'] . "'
+																													AND customer_group_id = '" . (int)$customer_group_id . "'
+																													AND quantity <= '" . (int)$discount_quantity . "'
+																												ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
+							if ($ro_discount_query->num_rows)	{
+								$product_discount_query = $ro_discount_query;
+							}
+						}
+					}
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		
+		<operation error="log">
+      <search position="before"><![CDATA[if ($product_special_query->num_rows) {]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( $ro_installed && isset($ro_settings['spec_price']) && $ro_settings['spec_price'] && isset($ro_settings['spec_price_special']) && $ro_settings['spec_price_special'] ) {
+					if ($ro_combs) {
+						foreach ($ro_combs as $ro_comb) {
+							$ro_special_query = $this->db->query(" SELECT price FROM " . DB_PREFIX . "relatedoptions_special
+																													WHERE relatedoptions_id = '" . (int)$ro_comb['relatedoptions_id'] . "'
+																														AND customer_group_id = '" . (int)$customer_group_id . "'
+																													ORDER BY priority ASC, price ASC LIMIT 1");
+							if ($ro_special_query->num_rows)	{
+								$product_special_query = $ro_special_query;
+							}
+						}
+					}	
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		
+		<operation error="log">
+      <search position="after"><![CDATA[$discounts = $this->model_catalog_product->getProductDiscounts($product_id);]]></search>
+			<ignoreif><![CDATA[var $lp_type = "lppro";]]></ignoreif>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			if ( empty($this->extension_code) ) { // old version of the module
+				if ( !isset($ro_installed) ) {
+					if ( !$this->model_extension_module_related_options ) {
+					$this->load->model('extension/module/related_options');
+					}
+					$ro_settings = $this->config->get('related_options');
+					$ro_installed = $this->model_extension_module_related_options->installed();
+		
+					if ($ro_installed) {
+					
+						$ro_combs = $this->model_extension_module_related_options->get_related_options_sets_by_poids($product_id, $options, true);
+					}
+				}
+				
+				if ( $ro_installed && isset($ro_settings['spec_price']) && $ro_settings['spec_price'] && isset($ro_settings['spec_price_discount']) && $ro_settings['spec_price_discount'] ) {
+					if ($ro_combs) {
+						foreach ($ro_combs as $ro_comb) {
+							$ro_discount_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "relatedoptions_discount
+																												WHERE relatedoptions_id = '" . (int)$ro_comb['relatedoptions_id'] . "'
+																													AND customer_group_id = '" . (int)$customer_group_id . "'
+																												ORDER BY quantity ASC, priority ASC, price ASC");
+							if ($ro_discount_query->num_rows)	{
+								$discounts = $ro_discount_query->rows;
+							}
+						}
+					}	
+				}
+			}
+			// >> Related Options / Связанные опции ]]></add>
+		</operation>
+		
+	</file>
+	
+	<file name="system/library/cart.php,system/library/cart/cart.php" error="skip">
+		
+		<!-- 	as result of this model, sku, upc и location are getting not from order_product, but from current related_options data
+					it looks wrong, but it's a standard OpenCart algorithm (for model field ) -->
+		<operation error="log">
+			<search position="before" regex="true"><![CDATA[~\$this->data\[\$key\] = array\(|\$product_data\[\] = array\(~]]></search>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			
+			$ro_product_fields = array('sku'=>'','upc'=>'','ean'=>'','location'=>'');
+			
+			if ($ro_for_product) {
+			//if ($ro_for_products && $ro_for_products[$key]) {
+			
+				foreach ($ro_for_product as $ro_comb) {
+				//foreach ($ro_for_products[$key] as $ro_comb) {
+				
+					if (isset($ro_settings['spec_sku']) && $ro_settings['spec_sku'] && $ro_comb['sku']) {
+						$ro_product_fields['sku'] = $ro_comb['sku'];
+					}
+					if (isset($ro_settings['spec_upc']) && $ro_settings['spec_upc'] && $ro_comb['upc']) {
+						$ro_product_fields['upc'] = $ro_comb['upc'];
+					}
+					if (isset($ro_settings['spec_ean']) && $ro_settings['spec_ean'] && $ro_comb['ean']) {
+						$ro_product_fields['ean'] = $ro_comb['ean'];
+					}
+					if (isset($ro_settings['spec_location']) && $ro_settings['spec_location'] && $ro_comb['location']) {
+						$ro_product_fields['location'] = $ro_comb['location'];
+					}
+				}
+			}
+			
+			// >> Related Options / Связанные опции 
+			
+			]]></add>
+		</operation>
+		
+		<operation error="log">
+			<search position="after" regex="true"><![CDATA[~\$this->data\[\$key\] = array\(|\$product_data\[\] = array\(~]]></search>
+			<add><![CDATA[
+			// << Related Options / Связанные опции 
+			
+			'sku'         => $ro_product_fields['sku'],
+			'upc'         => $ro_product_fields['upc'],
+			'ean'         => $ro_product_fields['ean'],
+			'location'    => $ro_product_fields['location'],
+			
+			// >> Related Options / Связанные опции 
+			
+			]]></add>
+		</operation>
+					
+	</file>
+
+    
+    <!-- compatibility with Brainy Filter extension -->
+		<operation error="skip">
+			<search position="after" regex="true"><![CDATA[
+				~\$sql = \$model->(prepareQueryForCategory|prepareQueryForTotal)\(\);~
+			]]></search>
+			<add><![CDATA[
+				// << Improved Options
+				
+				if (!empty($data['filter_name'])) {
+					if ( !$this->model_extension_module_related_options ) {
+						$this->load->model('extension/module/related_options');
+					}
+					
+					if (	$this->model_extension_module_related_options->installed() ) {
+					
+						$ro_settings = $this->config->get('related_options');
+						$sql_ro = '';
+						if (isset($ro_settings['spec_model']) && $ro_settings['spec_model']) {
+							if ($ro_settings['spec_model'] == 1) {
+								$sql_ro .= " OR p.product_id IN ( SELECT RO.product_id FROM ".DB_PREFIX."relatedoptions RO 
+										where  LCASE(RO.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "' ) ";
+							} else {
+								$sql_ro .= " OR p.product_id IN ( SELECT ROS.product_id FROM ".DB_PREFIX."relatedoptions_search ROS
+										where  LCASE(ROS.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "' ) ";
+							}
+						}
+						if (isset($ro_settings['spec_sku']) && $ro_settings['spec_sku']) {
+							$sql_ro .= " OR p.product_id IN ( SELECT RO.product_id FROM ".DB_PREFIX."relatedoptions RO 
+									where  LCASE(RO.sku) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "' ) ";
+						}
+						if ( $sql_ro ) {
+							$sql = str_replace('OR LCASE(p.sku)', $sql_ro.' OR LCASE(p.sku) ', $sql);
+						}
+					
+					}
+				}
+				// >> Improved Options
+			]]></add>
+		</operation>
+    
+	</file>
+	
+	
+
+	
+	
+	
+
+	
+	
+  
+	<!-- journal2 skip for mihoshop -->
+  <!-- <file name="catalog/view/theme/*/template/product/product.tpl"> -->
+	<file path="catalog/view/theme/*/template/" name="product/product.tpl,extension/module/tm_ajax_quick_view_popup.tpl,themecontrol/product.tpl,journal2/quickview/quickview.tpl,product/quick_view_product.tpl,product/fnt_product_design.tpl,module/popup_view.tpl,extension/module/popup_view.tpl,product/quick_product.tpl,revolution/revpopupview.tpl,revolution/revpopuporder.tpl,soconfig/quickview.tpl,product/quickview.tpl" error="skip">
+		
+		<!-- fastor theme script modification -->
+		<operation error="skip">
+      <search position="after"><![CDATA[
+				$('#input-option<?php echo $option['product_option_id']; ?>').on('click', 'span', function () {
+			]]></search>
+			<add><![CDATA[
+				// << Related Options / Связанные опции
+				if ( $(this).siblings(':radio, :checkbox').is(':disabled') ) {
+					return
+				}
+				// >> Related Options / Связанные опции
+			]]></add>
+		</operation>
+	</file>
+
+	
+
+	
+	<file name="catalog/view/theme/themeXXX/template/product/*.tpl,catalog/view/theme/themeXXX/template/extension/module/*.tpl,catalog/view/theme/theme725/template/product/*.tpl,catalog/view/theme/theme725/template/extension/module/*.tpl" error="skip">
+		<operation error="skip">
+			<search position="after"><![CDATA[
+				<?php if ($product['options']) { ?>
+			]]></search>
+			<add><![CDATA[
+				<?php // << Related Options ?>
+				<?php if ( !empty($product['ro_data']) && !empty($product['ro_settings']) ) { ?>
+					<?php
+						if ( !isset($ro_custom_option_block_counter) ) {
+							$ro_custom_option_block_counter = 0;
+						} else {
+							$ro_custom_option_block_counter++;
+						}
+						$current_ro_block_id = 'ro-options-'.$product['product_id'].'-'.$ro_custom_option_block_counter; 
+							
+					?>
+					
+					<?php if ( empty($ro_custom_selectbox_script_included) ) { ?>
+						<script src="catalog/view/theme/<?php echo $product['ro_theme_name']; ?>/js/jquery.selectbox-0.2.min.js" type="text/javascript"></script>
+						<style>
+							<?php if ( $product['ro_theme_name'] == 'theme725' ) { ?>
+								.sbDisabled { padding-left:10px; padding-top:8px; padding-bottom:8px; opacity:0.4; line-height:32px; }
+							<?php } else { ?>
+								.sbDisabled { padding-left:10px; padding-top:8px; padding-bottom:8px; opacity:0.4; line-height:37px; }
+							<?php } ?>
+						</style>
+						<?php
+							$ro_custom_selectbox_script_included = true;
+						?>
+					<?php } ?>
+					
+					<script type="text/javascript">
+					
+						$(document).ready(function(){
+							var ro_params = {};
+							ro_params['ro_settings'] = <?php echo json_encode($product['ro_settings']); ?>;
+							ro_params['ro_data'] = <?php echo json_encode($product['ro_data']); ?>;
+							ro_params['ro_theme_name'] = '<?php echo json_encode($product['ro_theme_name']); ?>';
+							<?php if ( !empty($product['ros_to_select']) ) { ?>
+								ro_params['ros_to_select'] = <?php echo json_encode($product['ros_to_select']); ?>;
+							<?php } ?>
+							
+							<?php if ( $product['ro_theme_name'] == 'themeXXX' || $product['ro_theme_name'] == 'theme725' ) { ?>
+								var $container_of_options = $('#<?php echo $current_ro_block_id; ?>').closest('.product-options');
+							<?php } ?>
+							
+							if ( $container_of_options && $container_of_options.length ) {
+								
+								var ro_event_setAccessibleOptionValues_select_after = function(event, product_option_id) {
+									ro_instance.getOptionElement('select[name="'+ro_instance.option_prefix+'['+product_option_id+']"]').selectbox("detach");
+									ro_instance.getOptionElement('select[name="'+ro_instance.option_prefix+'['+product_option_id+']"]').selectbox({
+										effect: "slide",
+										speed: 400
+									});
+								}
+								
+								<?php if ( !empty($product['ro_settings']['show_clear_options']) ) { ?>
+									<?php if ((int)$product['ro_settings']['show_clear_options'] == 1) { ?>
+										$(document).ready( function() {
+											$container_of_options.find('.options h3').after('<div class="form-group"><div class="col-sm-12 text-left"><a href="#" id="clear_options"><?php echo $text_ro_clear_options; ?></a></div></div>');
+										});
+									<?php } else { ?>
+										$(document).ready( function() {
+											$container_of_options.find('.options .form-group:last').after('<div class="form-group"><div class="col-sm-12 text-left"><a href="#" id="clear_options"><?php echo $text_ro_clear_options; ?></a></div></div>');
+										});
+									<?php } ?>
+								
+									var clearOptions = function() { // ro_clear_options
+			
+										ro_instance.getOptionElement('input[type=radio][name^="'+ro_instance.option_prefix+'"]:checked').each(function(){
+											var product_option_id = ro_instance.getProductOptionIdFromName($(this).attr('name'));
+											ro_instance.setOptionValue(product_option_id, ''); // compatible also with PIODD
+										});
+										ro_instance.getOptionElement('select[name^="'+ro_instance.option_prefix+'"]').val('');
+										ro_instance.getOptionElement('textarea[name^="'+ro_instance.option_prefix+'"]').val('')
+										ro_instance.getOptionElement('input[type=text][name^="'+ro_instance.option_prefix+'"]').val('');
+										ro_instance.getOptionElement('input[type=checkbox][name^="'+ro_instance.option_prefix+'"]').prop('checked', false);
+										ro_instance.getOptionElement('input[type=hidden][name^="'+ro_instance.option_prefix+'"]').val('')
+										if ( typeof(ro_instance.controlAccessToValuesOfAllOptions) == 'function' ) {
+											ro_instance.controlAccessToValuesOfAllOptions();
+										}
+										
+										ro_instance.executeFunctionsFromOtherExtensionsOnOptionChange();
+										
+										return false;
+									}
+									
+									$container_of_options.on('click', '#clear_options', function(e){
+										e.preventDefault();
+										clearOptions();
+									});
+								<?php } ?>
+								
+								var ro_instance = $container_of_options.liveopencart_RelatedOptions(ro_params);
+								
+								ro_instance.bind('setAccessibleOptionValues_select_after.ro', ro_event_setAccessibleOptionValues_select_after);
+								
+								ro_instance.initRO();
+							}
+						});
+					</script>
+				<?php } ?>
+				<?php // >> Related Options ?>
+			]]></add>
+		</operation>
+		
+		
+		<operation error="skip">
+			<search position="after"><![CDATA[
+				<input type="text" name="product_id" value="<?php echo $product['product_id'] ?>" class="form-control"/>
+			]]></search>
+			<add><![CDATA[
+				<?php // << Related Options ?>
+				<?php if ( !empty($current_ro_block_id) ) { ?>
+					<input type="hidden" id="<?php echo $current_ro_block_id; ?>" >
+				<?php } ?>
+				<?php // >> Related Options ?>
+			]]></add>
+		</operation>
+		
+	</file>
+	<!-- >> compatibility with themeXXX - adding popup with options in product lists -->
+  
+
+
+
+</modification>

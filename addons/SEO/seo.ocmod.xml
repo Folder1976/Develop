@@ -1,0 +1,356 @@
+<modification>
+	<name>SEO schema</name>
+	<code>SEO schema</code>
+	<version>1.0</version>
+	<author>Folder Kotlyarov Sergey</author>
+	<link>https://skillcode.ru</link>
+	<file path="catalog/model/catalog/product.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[public function getTotalProducts($data = array()) {]]></search>
+			<add position="before" ><![CDATA[
+		public function getTotalProductsInfo($data = array()) {
+			$sql = "SELECT MAX(DISTINCT p.product_id) AS max_price, MIN(DISTINCT p.product_id) AS min_price, COUNT(DISTINCT p.product_id) AS total ";
+			
+			if (!empty($data['filter_category_id'])) {
+				if (!empty($data['filter_sub_category'])) {
+					$sql .= " FROM " . DB_PREFIX . "category_path cp LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON (cp.category_id = p2c.category_id)";
+					} else {
+					$sql .= " FROM " . DB_PREFIX . "product_to_category p2c";
+				}
+				
+				if (!empty($data['filter_filter'])) {
+					$sql .= " LEFT JOIN " . DB_PREFIX . "product_filter pf ON (p2c.product_id = pf.product_id) LEFT JOIN " . DB_PREFIX . "product p ON (pf.product_id = p.product_id)";
+					} else {
+					$sql .= " LEFT JOIN " . DB_PREFIX . "product p ON (p2c.product_id = p.product_id)";
+				}
+				} else {
+				$sql .= " FROM " . DB_PREFIX . "product p";
+			}
+			
+			$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
+			
+			if (!empty($data['filter_category_id'])) {
+				if (!empty($data['filter_sub_category'])) {
+					$sql .= " AND cp.path_id = '" . (int)$data['filter_category_id'] . "'";
+					} else {
+					$sql .= " AND p2c.category_id = '" . (int)$data['filter_category_id'] . "'";
+				}
+				
+				if (!empty($data['filter_filter'])) {
+					$implode = array();
+					
+					$filters = explode(',', $data['filter_filter']);
+					
+					foreach ($filters as $filter_id) {
+						$implode[] = (int)$filter_id;
+					}
+					
+					$sql .= " AND pf.filter_id IN (" . implode(',', $implode) . ")";
+				}
+			}
+			
+			if (!empty($data['filter_name']) || !empty($data['filter_tag'])) {
+				$sql .= " AND (";
+				
+				if (!empty($data['filter_name'])) {
+					$implode = array();
+					
+					$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_name'])));
+					
+					foreach ($words as $word) {
+						$implode[] = "pd.name LIKE '%" . $this->db->escape($word) . "%'";
+					}
+					
+					if ($implode) {
+						$sql .= " " . implode(" AND ", $implode) . "";
+					}
+					
+					if (!empty($data['filter_description'])) {
+						$sql .= " OR pd.description LIKE '%" . $this->db->escape($data['filter_name']) . "%'";
+					}
+				}
+				
+				if (!empty($data['filter_name']) && !empty($data['filter_tag'])) {
+					$sql .= " OR ";
+				}
+				
+				if (!empty($data['filter_tag'])) {
+					$implode = array();
+					
+					$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_tag'])));
+					
+					foreach ($words as $word) {
+						$implode[] = "pd.tag LIKE '%" . $this->db->escape($word) . "%'";
+					}
+					
+					if ($implode) {
+						$sql .= " " . implode(" AND ", $implode) . "";
+					}
+				}
+				
+				if (!empty($data['filter_name'])) {
+					$sql .= " OR LCASE(p.model) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.sku) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.upc) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.ean) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.jan) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.isbn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+					$sql .= " OR LCASE(p.mpn) = '" . $this->db->escape(utf8_strtolower($data['filter_name'])) . "'";
+				}
+				
+				$sql .= ")";
+			}
+			
+			if (!empty($data['filter_manufacturer_id'])) {
+				$sql .= " AND p.manufacturer_id = '" . (int)$data['filter_manufacturer_id'] . "'";
+			}
+			
+			$query = $this->db->query($sql);
+			
+			return $query->row;
+		}
+					  ]]></add>
+		</operation>
+		<operation  error="skip">
+			<search index="0"><![CDATA['name'             => $query->row['name'],]]></search>
+			<add position="before" ><![CDATA[
+				'seo'             => $seo,
+					  ]]></add>
+		</operation>
+		<operation  error="skip">
+			<search index="0"><![CDATA[if ($query->num_rows) {]]></search>
+			<add position="after" ><![CDATA[
+				$seo = $this->cache->get('product.seo.' . $query->row['product_id']);
+			
+			if(!$seo){
+			
+				$this->load->model("tool/image");
+			
+				$r = $this->db->query("SELECT COUNT(rating) AS total FROM " . DB_PREFIX . "review WHERE product_id = ".$query->row['product_id']." AND status = '1'");
+				
+				$ratingCount = $r->row['total'];
+				
+				if ($query->row['image']) {
+					$image = $this->model_tool_image->resize($query->row['image'], $this->config->get($this->config->get('config_theme') . '_image_product_width'), $this->config->get($this->config->get('config_theme') . '_image_product_height'));
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get($this->config->get('config_theme') . '_image_product_width'), $this->config->get($this->config->get('config_theme') . '_image_product_height'));
+				}
+				$href = $this->url->link('product/product', '&product_id=' . $query->row['product_id'] );
+				$in_stok = 'InStock';
+				if((int)$query->row['quantity'] < 1){
+					$in_stok = 'OutOfStock';
+				}
+				
+				$description = str_replace('"', "'",strip_tags(html_entity_decode($query->row['description'], ENT_QUOTES, 'UTF-8')));
+				if(strlen($description) < 3){
+					$description = str_replace('"', "'", $query->row['name']);
+				}
+				
+				$seo = '
+						<script type="application/ld+json"> 
+						{
+							"@context": "http://schema.org/",
+							"@type": "Product",
+							"name": "'.(str_replace('"', "'", $query->row['name'])).'",
+							"image": "'.$image.'",
+							"brand": {
+								"@type": "Brand",
+								"name": "'.$query->row['manufacturer'].'"
+							},
+							"mpn": "'.$query->row['product_id'].'",
+							"sku": "'.$query->row['product_id'].'",
+							"aggregateRating": {
+								"@type": "AggregateRating",
+								"bestRating": 5,
+								"worstRating": 1,
+								"ratingCount": '.(($ratingCount) ? $ratingCount : 1).',
+								"ratingValue": '.((round($query->row['rating']) > 0) ? round($query->row['rating']) : 1).',
+								"reviewCount" : '.((((int)$query->row['reviews']) > 0) ? (int)$query->row['reviews'] : 1).'
+							},
+							"description": "'.$description.'",
+							"offers": {
+								"@type": "Offer",
+								"url": "'.$href.'",
+								"priceCurrency": "UAH",
+								"price": "'.$query->row['price'].'",
+								"priceValidUntil": "'.date('Y-m-d').'",
+								"itemCondition": "http://schema.org/New",
+								"availability": "http://schema.org/'.$in_stok.'"
+							}
+						}
+					</script>
+				';
+				
+				$this->cache->set('product.seo.' . $query->row['product_id'], $seo);
+			}
+					  ]]></add>
+		</operation>
+		
+	</file>	
+	<file path="catalog/controller/product/category.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[$product_total = $this->model_catalog_product->getTotalProducts($filter_data);]]></search>
+			<add position="before" ><![CDATA[
+				$product_total_info = $this->model_catalog_product->getTotalProductsInfo($filter_data);
+				$data['seo'] = array(
+					 'name' => $category_info['name'],
+					 'offerCount' => $product_total,
+					 'highPrice' => $product_total_info['max_price'],
+					 'lowPrice' => $product_total_info['min_price'],
+					 'priceCurrency' => $this->session->data['currency'],
+					 );
+					  ]]></add>
+		</operation>
+		<operation  error="skip">
+			<search index="0"><![CDATA[$data['products'][] = array(]]></search>
+			<add position="after" ><![CDATA[
+				'seo'  => $result['seo'],
+					  ]]></add>
+		</operation>
+	</file>	
+	<file path="catalog/view/theme/default/template/product/category.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php echo $header; ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php if(isset($seo)){ ?>
+					<script type="application/ld+json"> 
+						{
+							"@context": "http://schema.org/",
+							"name": "<?php echo $seo['name']; ?>",
+							"@type": "AggregateOffer",
+							"offerCount": <?php echo $seo['offerCount']; ?>,
+							"highPrice": <?php echo $seo['highPrice']; ?>,
+							"lowPrice": <?php echo $seo['lowPrice']; ?>,
+							"priceCurrency": "<?php echo $seo['priceCurrency']; ?>"
+						  }
+					</script>
+					<?php } ?>
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/extension/module/bestseller.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[$data['products'][] = array(]]></search>
+			<add position="after" ><![CDATA[
+				'seo'  => $result['seo'],
+					  ]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/controller/extension/module/latest.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[$data['products'][] = array(]]></search>
+			<add position="after" ><![CDATA[
+				'seo'  => $result['seo'],
+					  ]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/controller/extension/module/featured.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[$data['products'][] = array(]]></search>
+			<add position="after" ><![CDATA[
+				'seo'  => $product_info['seo'],
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/extension/module/bestseller.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/extension/module/featured.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/extension/module/latest.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/product/product.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php echo $header; ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $seo; ?>
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/product.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[if ($product_info) {]]></search>
+			<add position="after" ><![CDATA[
+				$this->load->model('catalog/review');
+				$data['seo'] = $product_info['seo'];
+				$data['reviews'] = $this->model_catalog_review->getReviewsByProductId($product_id, 0, 100);
+				if(isset($data['reviews']) AND count($data['reviews'])){ 
+				
+					$text = '"review": [';
+					foreach($data['reviews'] AS $row){ 
+					   $text .= '{
+						  "@type": "Review",
+						  "author": "'.$row['author'].'",
+						  "datePublished": "'.$row['date_added'].'",
+						  "description": "'.$row['text'].'",
+						  "name": "'.$row['name'].'",
+						  "reviewRating": {
+							"@type": "Rating",
+							"bestRating": "5",
+							"ratingValue": "'.$row['rating'].'",
+							"worstRating": "1"
+						  }
+						},';
+					}
+					$text = trim($text, ',');
+					$text .= "],";
+					
+					$data['seo'] = str_replace('"offers"',$text."\n".'"offers"', $data['seo']);
+				}
+					  ]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/default/template/extension/module/latest.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/extension/module/bestseller.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/default/template/extension/module/featured.tpl">
+		<operation  error="skip">
+			<search index="0"><![CDATA[<?php foreach ($products as $product) { ?>]]></search>
+			<add position="after" ><![CDATA[
+				<?php echo $product['seo']; ?>
+					  ]]></add>
+		</operation>
+	</file>
+
+</modification>
+

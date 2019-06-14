@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<name>UDS module Folder</name>
+	<version>1.0.0</version>
+	<author>UDS module Folder</author>
+	<link>https://skillcode.ru/</link>
+	<code>UDS</code>
+	<file path="config.php">
+		<operation error="skip">
+		    <search><![CDATA[
+			// HTTP
+		    ]]>
+		    </search>
+		    <add position="before"><![CDATA[
+			define('UDS_KEY', '549756004017');
+			define('UDS_API', 'MDhhMzhhYjYtY2FiZi00MDA2LTkwOGQtNDM1NzQxYjQ0MGQz');
+		    ]]></add>
+		</operation>
+	</file>
+	<file path="controller/checkout/checkout.php">
+		<operation error="skip">
+		    <search><![CDATA[
+			$order_id = $this->model_checkout_order->addOrder($data);
+		    ]]>
+		    </search>
+		    <add position="before"><![CDATA[
+			// UDS ======================================
+            if(isset($this->request->post['uds-discount'])) {
+                $data['uds-discount'] = $this->request->post['uds-discount'];			
+			} elseif (isset($this->session->data['uds-discount'])) {
+				$data['uds-discount'] = $this->session->data['uds-discount'];
+			} else {
+				$data['uds-discount'] = null;
+			}
+			
+			if(isset($this->request->post['uds-code'])) {
+                $data['uds-code'] = $this->request->post['uds-code'];			
+			} elseif (isset($this->session->data['uds-code'])) {
+				$data['uds-code'] = $this->session->data['uds-code'];
+			} else {
+				$data['uds-code'] = null;
+            }
+            $data['uds_discount'] = $data['uds-code'];
+			
+			if((int)$data['uds-discount'] > 0 AND $data['uds-code']){
+				
+				foreach($data['totals'] as $row){
+					if($row['code'] == 'total'){
+						$total = (int)$data['currency_value'] * $row['value'];
+					}
+				}
+				
+				$data_uds = array('copupon'=>$data['uds-code'],
+								  'scores'=>(int)$data['uds-discount'],
+								  'total'=>$total,
+								  'cash'=>$total - (int)$data['uds-discount'],
+								  );
+				
+				$uds_res = $this->getUds($data_uds);
+				
+				if(!isset($uds_res['errorCode'])){
+				
+					$uds_discount = (float)$data['uds-discount'] / (float)$data['currency_value'];
+				
+					$data['totals'][] = array(
+											  'code' => 'uds',
+											  'title' => 'Скидка UDS',
+											  'text' => $this->currency->format($uds_discount),
+											  'value' => $uds_discount,
+											  'sort_order' => '2'
+											  );
+					
+					
+					
+					$data['comment'] .= " Применен UDS купон: ".$uds_res['operation']['scoresDelta'].' р.
+						ID: '.$uds_res['operation']['participantId'].'
+						Дата: '.$uds_res['operation']['dateCreated'].'
+						Клиент: '.$uds_res['operation']['customer']['name'].' '.$uds_res['operation']['customer']['surname'].'';
+					
+					foreach($data['totals'] as $id => $row){
+						if($row['code'] == 'total'){
+							$data['totals'][$id]['value'] = $row['value'] - (float)$uds_discount;
+							$data['totals'][$id]['text'] = $this->currency->format($row['value'] - (float)$uds_discount);
+							
+						}
+					}
+					
+				}
+				
+			}
+			// UDS END ======================================
+		    ]]></add>
+		</operation>		<operation error="skip">
+		    <search><![CDATA[
+			public function index() {
+		    ]]>
+		    </search>
+		    <add position="before"><![CDATA[
+				public function getUds($data){
+					$total = (int)$data['total'];
+					$cash = (int)$data['cash'];
+					$scores = (int)$data['scores'];
+					$code = (string)$data['copupon'];
+					
+					//echo gettype($total);
+					//echo gettype($cash);
+					//echo gettype($scores);
+					//echo gettype($code);
+			
+					$date = new DateTime();
+					$url = 'https://udsgame.com/v1/partner/purchase';
+					$uuid_v4 = UDS_KEY; 
+					$apiKey = UDS_API;
+			
+					// Set request body
+					$postData = json_encode(
+						array(
+							'total' => $total,
+							'cash' => $cash,
+							'scores'=> $scores,
+							'code'=> $code
+						)
+					);
+					// Create a stream
+					$opts = array(
+						'http' => array(
+							'method' => 'POST',
+							'header' => "Accept: application/json\r\n" .
+										"Accept-Charset: utf-8\r\n" .
+										"Content-Type: application/json\r\n" .
+										"X-Api-Key: ".$apiKey."\r\n" .
+										"X-Origin-Request-Id: ".$uuid_v4."\r\n" .
+										"X-Timestamp: ".$date->format(DateTime::ATOM),
+							'content' => $postData,
+							'ignore_errors' => true
+						)
+					);
+			
+					$context = stream_context_create($opts);
+					
+					$result = file_get_contents($url, false, $context);
+					return json_decode($result, true);
+			
+			
+				}
+		    ]]></add>
+		</operation>
+	</file>
+</modification>

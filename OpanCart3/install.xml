@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<name><![CDATA[<font color="#263238"><b>Twig Debug</b></font>]]></name>
+	<code>twig-debug</code>
+	<version>1.0</version>
+	<author><![CDATA[<font color="#263238"><b>Trydalcoholic</b></font>]]></author>
+	<link>//goo.gl/pSwwUR</link>
+	<file path="system/library/template/twig.php">
+		<operation>
+			<search><![CDATA[$config = array('autoescape' => false);]]></search>
+			<add position="replace">
+				<![CDATA[
+				$config = array(
+					'autoescape'	=> false,
+					'debug'			=> true,
+				);
+				]]>
+			</add>
+		</operation>
+		<operation>
+			<search><![CDATA[$this->twig = new \Twig_Environment($loader, $config);]]></search>
+			<add position="after">
+				<![CDATA[$this->twig->addExtension(new \Twig_Extension_Debug());]]>
+			</add>
+		</operation>
+	</file>
+</modification>

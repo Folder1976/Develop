@@ -8,7 +8,7 @@
 		<operation  error="skip">
 			<search index="0"><![CDATA[<td class="text-left"><?php echo $order['order_status']; ?></td>]]></search>
 			<add position="replace" ><![CDATA[
-				// ajax_orders_admin * * * Start
+				<!-- ajax_orders_admin * * * Start -->
 				  <td class="text-left">
                     <select  id="input-order-status<?php echo $order['order_id']; ?>" data-order_id="<?php echo $order['order_id']; ?>" class="order_status_ajax form-control">
                       <option value="*"></option>
@@ -21,26 +21,54 @@
                         <?php } ?>
                     </select>
                   </td>
-				// ajax_orders_admin * * * End
+				<!-- ajax_orders_admin * * * End -->
 					  ]]></add>
 		</operation>
 		<operation  error="skip">
 			<search index="0"><![CDATA[<?php echo $footer; ?> ]]></search>
 			<add position="before" ><![CDATA[
-				// ajax_orders_admin * * * Start
-				  <td class="text-left">
-                    <select  id="input-order-status<?php echo $order['order_id']; ?>" data-order_id="<?php echo $order['order_id']; ?>" class="order_status_ajax form-control">
-                      <option value="*"></option>
-                        <?php foreach ($order_statuses as $order_status) { ?>
-                          <?php if ($order_status['name'] == $order['order_status']) { ?>
-                          <option value="<?php echo $order_status['order_status_id']; ?>" selected="selected"><?php echo $order_status['name']; ?></option>
-                          <?php } else { ?>
-                          <option value="<?php echo $order_status['order_status_id']; ?>"><?php echo $order_status['name']; ?></option>
-                          <?php } ?>
-                        <?php } ?>
-                    </select>
-                  </td>
-				// ajax_orders_admin * * * End
+	<script>
+  $(document).on('change', '.order_status_ajax', function(){
+      
+      var order_id = $(this).data('order_id');
+      var order_status_id = $(this).val();
+      
+      console.log(order_id+' '+order_status_id);
+      
+      $.ajax({
+        url: '/index.php?route=api/order/history&reset_api&token=<?php echo $_GET['token']; ?>&store_id=0&order_id='+order_id,
+        type: 'post',
+        dataType: 'json',
+        data: 'order_status_id=' + order_status_id + '&notify=0&override=0&append=0&comment=' + encodeURIComponent('список'),
+        beforeSend: function() {
+          $('#button-history').button('loading');
+        },
+        complete: function() {
+          $('#button-history').button('reset');
+        },
+        success: function(json) {
+          
+          console.log(json);
+          
+          $('.alert').remove();
+    
+          if (json['error']) {
+            console.log(json['error']);
+            alert(json['error']);
+          }
+    
+          if (json['success']) {
+            console.log('success');
+            
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+      });
+      
+  });
+</script>
 					  ]]></add>
 		</operation>
 	</file>	

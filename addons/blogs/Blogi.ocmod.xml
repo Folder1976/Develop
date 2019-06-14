@@ -51,6 +51,27 @@
 				}elseif ($data['route'] == 'product/blog_product' && $key == 'blog_product_id') {
 					$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "url_alias WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "'");
 
+					//Отдельно найдем путь
+					if($key == 'blog_product_id'){
+						$product_id = $value;
+						
+						$r = $this->db->query("SELECT * FROM " . DB_PREFIX . "blog_product_to_category WHERE blog_product_id='" . (int)$product_id . "' LIMIT 1");
+						if($r->num_rows){
+							
+							$category_id = (int)$r->row['blog_category_id'];
+							$r = $this->db->query("SELECT * FROM " . DB_PREFIX . "blog_category_path cp
+													LEFT JOIN " . DB_PREFIX . "url_alias ua ON ua.query = CONCAT('blog_category_id=', cp.path_id)
+													WHERE cp.blog_category_id='" . (int)$category_id . "'");
+							
+							if($r->num_rows){
+								foreach($r->rows as $row){
+									$path .= '/'.$row['keyword'];
+								}
+							}
+						}
+					}
+
+
 					if ($query->num_rows && $query->row['keyword']) {
 						$url .= '/' . $query->row['keyword'];
 

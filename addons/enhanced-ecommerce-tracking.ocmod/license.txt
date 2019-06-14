@@ -1,0 +1,62 @@
+
+
+VANSTUDIO COMMERCIAL PRODUCTS LICENSE AGREEMENT
+
+Author: I.Nasobkov t/a VanStudio
+
+E-mail: info@vanstudio.co.ua
+
+Site: https://vanstudio.co.ua
+
+
+==============================================================================
+
+
+    LICENSE AGREEMENT
+
+
+    This is a legal agreement between you (private person, company, or any other entity) and VanStudio, for any
+    commercial software products or services developed by VanStudio. VanStudio products include extensions sold on
+    VanStudio.com and OpenCart.com.
+
+    By purchasing products developed by VanStudio you agree that you have read our License Agreement and agree
+    to be bound by the terms of it. The Agreement becomes effective from the moment you purchase software sold
+    on VanStudio.com or OpenCart.com.
+
+    BY PURCHASING ANY OUR PRODUCTS, YOU AGREE, ACCEPT, AND UNDERSTAND THE FOLLOWING TERMS STATED:
+
+    * Use the extension only with the applicable number of OpenCart installations for which you purchased licenses.
+
+    * No matter the number of licenses purchased, changing the name, redistribution, extract components, reverse
+    engineering or resale of the extension is not allowed.
+
+    * Multiple OpenCart installations (including multi-store installations) are covered by a single license is provided
+    only if you are the sole owner and profiter of all stores. If you don't store owner and you receive any type of
+    revenue from someone else for a store, you must purchase a license for that store.
+
+    * The extension come with 1 year of free support and updates. Beyond that, you can continue to use the version you
+    have installed indefinitely. If you want to update the extension to the latest version after one year, you can
+    purchase a new license (with 50% discount) by contacting VanStudio.
+
+    * VanStudio products are provided "as is" without warranty of any kind, either expressed or implied. In no event
+    shall we be liable for any damages including, but not limited to, direct, indirect, special, incidental or
+    consequential damages or other losses arising out of the use of or inability to use our products.
+
+    * Our extensions are tested and fully compatible only with the default installation of OpenCart unless otherwise
+    stated in the description. No guarantee is provided that they will work with a third-party software and other
+    customizations you've made.
+
+    * Some extensions will need customization in order to work with certain themes and third-party software.
+
+    * Each customer is allowed to customize our product in order to fit his unique OpenCart store needs. Upon asking
+    for support, the user has to have a clear record of all files and changes made in order to get support.
+
+    * VanStudio reserves the right to terminate support, access to updates, delete product purchases, where needed,
+    if the user fails to comply with our license policy.
+
+    * VanStudio reserves the right to make changes to the terms of this license agreement and change its clauses
+    at any given time without further notifications.
+
+
+	IF YOU DISAGREE WITH ANY OF THE TERMS OF THIS AGREEMENT, YOU MAY NOT USE THE VANSTUDIO PRODUCTS.
+
