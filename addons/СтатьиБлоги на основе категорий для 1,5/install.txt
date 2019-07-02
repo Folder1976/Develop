@@ -1,0 +1,2 @@
+ftp://SportLenti/www.rocktape.ua/admin/view/template/common/header.tpl
+<li><a href="/admin/index.php?route=catalog/blog&token=<?php echo $_GET['token']; ?>">Статьи/Блог</a></li>

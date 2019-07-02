@@ -1,0 +1,72 @@
+<modification>
+	<name>Auto Translate</name>
+	<code>Auto Translate</code>
+	<version>1.0</version>
+	<author>Folder Kotlyarov Sergey</author>
+	<link>https://skillcode.ru</link>
+	<file path="admin/controller/common/column_left.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[if ($this->user->hasPermission('access', 'design/banner')) {]]></search>
+			<add position="before" ><![CDATA[
+				if ($this->user->hasPermission('access', 'design/translate')) {
+					$design[] = array(
+						'name'	   => 'Автозамена',
+						'href'     => $this->url->link('design/translate', 'token=' . $this->session->data['token'], true),
+						'children' => array()		
+						);	
+				}
+					  ]]></add>
+		</operation>
+	</file>
+
+	<file path="system/engine/loader.php">
+		<operation  error="skip">
+			<search index="0"><![CDATA[$output = $template->render($route . '.tpl');]]></search>
+			<add position="after" ><![CDATA[
+		// ===========
+		if(!defined('IS_ADMIN')){
+		$layout_id = $this->registry->get('config')->get('config_layout_id');
+		if(isset($this->registry->get('request')->get['route'])){
+			$sql = 'SELECT layout_id FROM '.DB_PREFIX.'layout_route WHERE `route`="'.$this->registry->get('request')->get['route'].'" LIMIT 1';
+			$r = $this->registry->get('db')->query($sql);
+			
+			if($r->num_rows){
+				$layout_id = (int)$r->row['layout_id'];
+			}else{
+				$layout = explode('/', $this->registry->get('request')->get['route']);
+				$sql = 'SELECT layout_id FROM '.DB_PREFIX.'layout_route WHERE `route`="'.$layout[0].'/%" LIMIT 1';
+				$r = $this->registry->get('db')->query($sql);
+			
+				if($r->num_rows){
+					$layout_id = (int)$r->row['layout_id'];
+				}
+
+			}
+			
+		}
+		
+		$sql = "SELECT * FROM " . DB_PREFIX . "translate a
+					LEFT JOIN " . DB_PREFIX . "translate_description ad ON (a.translate_id = ad.translate_id)
+					WHERE ad.language_id = '" . (int)$this->registry->get('config')->get('config_language_id') . "'
+					AND a.status=1 AND layout_id IN ($layout_id, 0)
+					ORDER BY a.sort_order ASC
+					";
+		$r = $this->registry->get('db')->query($sql);
+		if($r->num_rows){
+			setlocale(LC_ALL, array("ru_RU.CP1251", "ru_SU.CP1251", "ru_RU", "russian", "ru_SU", "ru")); 
+			foreach($r->rows AS $row){
+				
+				if((int)$row['lower']){
+					$output = str_replace($row['translate_group_id'], $row['name'], $output);
+				}else{
+					$output = str_ireplace($row['translate_group_id'], $row['name'], $output);
+				}
+			}
+		}
+		}
+					  ]]></add>
+		</operation>
+	</file>
+
+</modification>
+

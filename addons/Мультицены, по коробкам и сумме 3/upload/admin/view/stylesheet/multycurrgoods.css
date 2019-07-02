@@ -1,0 +1,25 @@
+.custum-send-ajax-btn{
+  display: block;
+  text-align: center;
+  border: 1px solid #b9b9b9;
+  padding: 10px;
+  cursor: pointer;
+}
+.custum-send-ajax-btn:hover{
+  background-color: #eee;
+}
+.recount-text{
+	position: relative;
+}
+.custom-hidden-recount-icon{
+	font-size: 14px;
+	position: absolute;
+	left: -20px;
+	visibility: hidden;
+}
+.custom-visible-recount-icon{
+  font-size: 14px;
+  position: absolute;
+  left: -20px;
+	visibility: visible;
+}

@@ -1,0 +1,1778 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<code>MarkUp</code>
+	<name>Multiprice</name>
+	<version>2.0</version>
+	<author>Folder - Kotlyarov Sergey</author>
+	<link>https://skillcode.ru</link>
+
+<file path="admin/controller/catalog/product.php">
+	<operation>
+		<search><![CDATA[
+		if (isset($this->request->post['quantity'])) {
+		]]></search>
+		<add position="before"><![CDATA[
+		/* markup */
+		if (isset($this->request->post['price1'])) {
+			$data['price1'] = $this->request->post['price1'];
+		} elseif (!empty($product_info)) {
+			$data['price1'] = $product_info['price1'];
+		} else {
+			$data['price1'] = 0;
+		}
+
+		if (isset($this->request->post['price2'])) {
+			$data['price2'] = $this->request->post['price2'];
+		} elseif (!empty($product_info)) {
+			$data['price2'] = $product_info['price2'];
+		} else {
+			$data['price2'] = 0;
+		}
+
+		if (isset($this->request->post['price3'])) {
+			$data['price3'] = $this->request->post['price3'];
+		} elseif (!empty($product_info)) {
+			$data['price3'] = $product_info['price3'];
+		} else {
+			$data['price3'] = 0;
+		}
+
+		if (isset($this->request->post['is_price'])) {
+			$data['is_price'] = $this->request->post['is_price'];
+		} elseif (!empty($product_info)) {
+			$data['is_price'] = $product_info['is_price'];
+		} else {
+			$data['is_price'] = 0;
+		}
+
+		if (isset($this->request->post['is_price'])) {
+			$data['is_price'] = $this->request->post['is_price'];
+		} elseif (!empty($product_info)) {
+			$data['is_price'] = $product_info['is_price'];
+		} else {
+			$data['is_price'] = 0;
+		}
+
+		if (isset($this->request->post['minimum_pak'])) {
+			$data['minimum_pak'] = $this->request->post['minimum_pak'];
+		} elseif (!empty($product_info)) {
+			$data['minimum_pak'] = $product_info['minimum_pak'];
+		} else {
+			$data['minimum_pak'] = 0;
+		}
+
+		if (isset($this->request->post['minimum_sum'])) {
+			$data['minimum_sum'] = $this->request->post['minimum_sum'];
+		} elseif (!empty($product_info)) {
+			$data['minimum_sum'] = $product_info['minimum_sum'];
+		} else {
+			$data['minimum_sum'] = 0;
+		}
+
+		if (isset($this->request->post['customer_group_id'])) {
+			$data['customer_group_id'] = $this->request->post['customer_group_id'];
+		} elseif (!empty($product_info)) {
+			$data['customer_group_id'] = $product_info['customer_group_id'];
+		} else {
+			$data['customer_group_id'] = 0;
+		}
+		
+		$this->load->model('localisation/currency');
+
+		$data['currencies'] = array(0 => array(
+									'title'        => 'По умолчанию',
+									'code'         => '0',
+									'currency_id'         => '0'	   
+											   ));
+
+		$results = $this->model_localisation_currency->getCurrencies();
+		
+		foreach ($results as $result) {
+			if ($result['status']) {
+				$data['currencies'][$result['currency_id']] = array(
+					'title'        => $result['title'],
+					'code'         => $result['code'],
+					'currency_id'         => $result['currency_id'],
+					'symbol_left'  => $result['symbol_left'],
+					'symbol_right' => $result['symbol_right']
+				);
+			}
+		}
+
+		if (isset($this->request->post['currency_id'])) {
+			$data['currency_id'] = $this->request->post['currency_id'];
+		} elseif (!empty($product_info)) {
+			$data['currency_id'] = $product_info['currency_id'];
+		} else {
+			$data['currency_id'] = 0;
+		}
+
+		if($data['currency_id'] > 0){
+			$data['selected_currency'] = $data['currencies'][$data['currency_id']]['code'];
+		}else{
+			$data['selected_currency'] = $this->config->get('config_currency');
+		}
+	     	
+			
+		$this->load->model('customer/customer_group');
+
+		$data['customer_groups_m'] = array(0 => array(
+									'name'        => 'Всем',
+									'customer_group_id'         => '0'	   
+											   ));
+
+		$results = $this->model_customer_customer_group->getCustomerGroups();
+		
+		foreach ($results as $result) {
+            $data['customer_groups_m'][$result['customer_group_id']] = array(
+                'name'        => $result['name'],
+                'customer_group_id'         => $result['customer_group_id']
+            );
+		}	
+		
+		
+/* Мультипрайс */
+		]]></add>
+	</operation>
+</file>
+<file path="admin/view/template/catalog/product_form.twig">
+	<operation>
+		<search><![CDATA[
+		<input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
+		]]></search>
+		<add position="after"><![CDATA[
+</div>
+              </div>
+              
+               <div class="form-group">
+                    <label class="col-sm-2 control-label" for="markup_currency_id-class">Валюта</label>
+                    <div class="col-sm-10">
+                        <select name="currency_id" id="currency_id-class" class="form-control price_calc">
+                            {% for currency in currencies %}
+                                {% if currency.currency_id == currency_id %}
+
+                                    <option value="{{ currency.currency_id }}" data-code="{{ currency.code }}" selected="selected">{{ currency.title }}</option>
+
+                                {% else %}
+
+                                    <option value="{{ currency.currency_id }}" data-code="{{ currency.code }}">{{ currency.title }}</option>
+
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+              
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-price">Политика цен</label>
+                <div class="col-sm-10">
+                  <table class="table table-striped table-bordered table-hover">
+                    <tr>
+                      <th>Розница</th>
+                      <th>Упаковка</th>
+                      <th>Опт</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="input-group" style="width: 50%; float: left;">
+                          <span class="input-group-addon">+</span>
+                          <input class="form-control price_calc" id="sp_to" name="price1" value="{{ price1 }}" placeholder="Цена" type="text">
+                          <span class="input-group-addon">%</span>
+                        </div>
+                        <input id="sp_to_res" class="form-control" name="sp_to_res_price" value="{{ price/100*price1 + price }} {{ selected_currency }}" style="width:50%" type="text" disabled="">
+                      </td>
+                      <td>
+                        <div class="input-group" style="width: 50%; float: left;">
+                          <span class="input-group-addon">+</span>
+                          <input class="form-control price_calc" id="sp_to-1" name="price2" value="{{ price2 }}" placeholder="Цена" type="text">
+                          <span class="input-group-addon">%</span>
+                        </div>
+                        <input id="sp_to_res-1" class="form-control" name="sp_to_res_price" value="{{ price/100*price2 + price }} {{ selected_currency }}" style="width:50%" type="text" disabled="">
+                      </td>
+                      <td>
+                        <div class="input-group" style="width: 50%; float: left;">
+                          <span class="input-group-addon">+</span>
+                          <input class="form-control price_calc" id="sp_to-2" name="price3" value="{{ price3 }}" placeholder="Цена" type="text">
+                          <span class="input-group-addon">%</span>
+                        </div>
+                        <input id="sp_to_res-2" class="form-control" name="sp_to_res_price" value="{{ price/100*price3 + price }} {{ selected_currency }}" style="width:50%" type="text" disabled="">
+                      </td>
+                    </tr>
+                  </table>
+
+                </div>
+              </div>
+              <script>
+                
+                var currancy = [];
+                {% for currency in currencies %}
+                  //currency[{{ currency.currency_id }}] = "{{ currency.code }}";
+                {% endfor %}
+                $(document).on('change','.price_calc', function(){
+                  var price = parseInt($('#input-price').val());
+                  var price1 = parseInt($('#sp_to').val());
+                  var price2 = parseInt($('#sp_to-1').val());
+                  var price3 = parseInt($('#sp_to-2').val());
+                  var curr = $('#currency_id-class').val();
+                  
+                  //console.log(price+' '+price1+' '+price2+' '+currency[curr]);
+                  
+                  
+                  $('#sp_to_res').val((price*(100+price1)/100)+" {{ selected_currency }}");
+                  $('#sp_to_res-1').val((price*(100+price2)/100)+" {{ selected_currency }}");
+                  $('#sp_to_res-2').val((price*(100+price3)/100)+" {{ selected_currency }}");
+                  
+                });
+              </script>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Пользовская наценка</label>
+                <div class="col-sm-10">
+                    {% if is_price  %}
+                      <input type="checkbox" name="is_price" value="1" checked="checked"/>
+                    {% else %}
+                      <input type="checkbox" name="is_price" value="1"/>
+                    {% endif %} 
+                </div>
+              </div>            
+              
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-quantity">{{ entry_quantity }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-minimum"><span data-toggle="tooltip" title="{{ help_minimum }}">{{ entry_minimum }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
+                </div>
+              </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-pack"><span data-toggle="tooltip" title="Количество в упаковке">Количестов в упаковке</span></label>
+                <div class="col-sm-10">
+                    <input type="text" name="minimum_pak" value="{{ minimum_pak }}" placeholder="количество в упаковке" id="input-pack" class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group" style="display: none">
+                <label class="col-sm-2 control-label" for="input-minimum_sum"><span data-toggle="tooltip" title="Опт от суммы">Опт от суммы</span></label>
+                <div class="col-sm-10">
+                    <input type="text" name="minimum_sum" value="{{ minimum_sum }}" placeholder="1000.00" id="input-minimum_sum" class="form-control"/>
+                </div>
+            </div>
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" for="customer_group_id-class">Отображать оптовую цену</label>
+                    <div class="col-sm-10">
+                        <select name="customer_group_id" id="customer_group_id-class" class="form-control">
+                            {% for customer_group in customer_groups_m %}
+                                {% if customer_group.customer_group_id == customer_group_id %}
+
+                                    <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+
+                                {% else %}
+
+                                    <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		<input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
+		]]></search>
+		<add position="replace"><![CDATA[
+		<input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control price_calc"/>
+		]]></add>
+	</operation>
+</file>
+<file path="admin/model/catalog/product.php">
+	<operation>
+		<search><![CDATA[
+		$product_id = $this->db->getLastId();
+		]]></search>
+		<add position="after"><![CDATA[
+		if (isset($data['price1'])) {
+			
+			if(!isset($data['is_price'])) $data['is_price'] = 0;
+			
+			$this->db->query("UPDATE " . DB_PREFIX . "product SET
+							 price1 = '" . (float)$data['price1'] . "',
+							 price2 = '" . (float)$data['price2'] . "',
+							 price3 = '" . (float)$data['price3'] . "',
+							 currency_id = '" . (int)$data['currency_id'] . "',
+							 customer_group_id = '" . (int)$data['customer_group_id'] . "',
+							 is_price = '" . (int)$data['is_price'] . "',
+							 minimum_pak = '" . (float)$data['minimum_pak'] . "',
+							 minimum_sum = '" . (float)$data['minimum_sum'] . "'
+							 WHERE product_id = '" . (int)$product_id . "'");
+		}
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
+		]]></search>
+		<add position="before"><![CDATA[
+		if (isset($data['price1'])) {
+			
+			if(!isset($data['is_price'])) $data['is_price'] = 0;
+			
+			$this->db->query("UPDATE " . DB_PREFIX . "product SET
+							 price1 = '" . (float)$data['price1'] . "',
+							 price2 = '" . (float)$data['price2'] . "',
+							 price3 = '" . (float)$data['price3'] . "',
+							 currency_id = '" . (int)$data['currency_id'] . "',
+							 customer_group_id = '" . (int)$data['customer_group_id'] . "',
+							 is_price = '" . (int)$data['is_price'] . "',
+							 minimum_pak = '" . (float)$data['minimum_pak'] . "',
+							 minimum_sum = '" . (float)$data['minimum_sum'] . "'
+							 WHERE product_id = '" . (int)$product_id . "'");
+		}
+		]]></add>
+	</operation>
+</file>
+<file path="admin/view/template/sale/order_info.twig">
+	<operation>
+		<search index="1"><![CDATA[
+		  <div class="container-fluid">
+		]]></search>
+		<add position="after"><![CDATA[
+<div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Корректировка цен в заказе</h3>
+          </div>
+          <div class="panel-body">
+            <form method="GET" name="markup">
+              <!-- Default unchecked -->
+              
+              <input type="hidden" name="route" value="sale/order/info">
+              <input type="hidden" name="user_token" value="{{ user_token }}">
+              <input type="hidden" name="order_id" value="{{ order_id }}">
+              
+              <div class="custom-control custom-radio">
+                <input value="opt" type="radio" class="custom-control-input" id="defaultUnchecked1" name="markup_price">
+                <label class="custom-control-label" for="defaultUnchecked1">Пересчитать заказ по оптовым ценам</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input value="pak" type="radio" class="custom-control-input" id="defaultUnchecked2" name="markup_price">
+                <label class="custom-control-label" for="defaultUnchecked2">Пересчитать заказ по ценам за упаковку</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input value="price" type="radio" class="custom-control-input" id="defaultUnchecked3" name="markup_price">
+                <label class="custom-control-label" for="defaultUnchecked3">Пересчитать заказ по розничным ценам</label>
+              </div>
+              <!-- Default checked -->
+              <div class="custom-control custom-radio">
+                <input value="markup" type="radio" class="custom-control-input" id="defaultChecked4" name="markup_price" >
+                <label class="custom-control-label" for="defaultChecked4">Цены по умолчанию (расчет цен производится согласно логике заданой в корзине по умолчанию)</label>
+              </div>
+              <div>
+                <span onClick="document.markup.submit();" id="btn-fop-save" class="btn btn-success"><i class="fa fa-save"></i> Сохранить</span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/product.php">
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="after"><![CDATA[
+// markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		$markup_data = $markup;
+		if($markup_data['markup_currency_id'] > 1){
+			$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+		}
+	
+		if($product_info['is_price']){
+			
+			if($product_info['currency_id'] > 0){
+				$product_info['minimum_sum'] = ($product_info['minimum_sum']/$currencies[$product_info['currency_id']]);
+			}
+	
+			$markup_data = array(
+								'markup_status' => $markup['markup_status'],
+								'markup_price1' => $product_info['price1'],
+								'markup_price2' => $product_info['price2'],
+								'markup_price3' => $product_info['price3'],
+								'markup_currency_id' => $product_info['currency_id'],
+								'markup_minimum_pak' => $product_info['minimum_pak'],
+								'markup_minimum_sum' => $markup['markup_minimum_sum'],
+								'markup_customer_group_id' => $product_info['customer_group_id'],
+								 );
+		}
+		
+		$tmp_price = $product_info['price'];
+		$product_info['price1'] = $product_info['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$product_info['currency_id']];
+		$product_info['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$product_info['currency_id']];
+		$product_info['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$product_info['currency_id']];
+		$product_info['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$product_info['currency_id']];
+		
+		$price1 = $this->currency->format($this->tax->calculate($product_info['price1'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+		$price2 = $this->currency->format($this->tax->calculate($product_info['price2'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+		$price3 = $this->currency->format($this->tax->calculate($product_info['price3'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+		$minimum_sum = $this->currency->format($this->tax->calculate($product_info['markup_minimum_sum'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+		if((int)$product_info['customer_group_id'] > 0){
+			if (!$this->customer->isLogged()){
+				$price3 = false;
+			}
+			if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$product_info['customer_group_id']){
+				$price3 = false;
+			}
+		}
+		if($product_info['minimum_pak'] < 1) $product_info['minimum_pak'] = 1;
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$discounts = $this->model_catalog_product->getProductDiscounts($this->request->get['product_id']);
+		]]></search>
+		<add position="before"><![CDATA[
+			// markup
+			$data['price'] = $price1;
+			$data['price1'] = $price1;
+			$data['price2']       = $price2;
+			$data['price3']       = $price3;
+			$data['minimum_sum']       = $minimum_sum;
+			$data['minimum_pak']       = $product_info['minimum_pak'];
+			$data['customer_group_id']       = (int)$product_info['customer_group_id'];
+			// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/model/catalog/product.php">
+	<operation>
+		<search><![CDATA[
+		'meta_keyword'     => $query->row['meta_keyword'],
+		]]></search>
+		<add position="before"><![CDATA[
+        'price1'            => $query->row['price1'],
+		'price2'            => $query->row['price2'],
+		'price3'            => $query->row['price3'],
+		'currency_id'            => $query->row['currency_id'],
+		'customer_group_id'            => $query->row['customer_group_id'],
+		'is_price'            => $query->row['is_price'],
+		'minimum_pak'            => $query->row['minimum_pak'],
+		'minimum_sum'            => $query->row['minimum_sum'],
+
+		]]></add>
+	</operation>
+</file>
+<file path="admin/controller/sale/order.php">
+	<operation>
+		<search><![CDATA[
+		if ($order_info) {
+		]]></search>
+		<add position="after"><![CDATA[
+            //====================== markup_price
+			if(isset($this->request->get['markup_price'])){
+				
+				$this->load->model('catalog/product');
+				$this->load->model('setting/setting');
+				$this->load->model('localisation/currency');
+				
+				$results = $this->model_localisation_currency->getCurrencies();
+				$currencies[0] = 1;
+				foreach ($results as $result) {
+					$currencies[$result['currency_id']] = $result['value'];
+					$currencies_code_to_id[$result['code']] = $result['currency_id'];
+				}
+		
+				
+				$markup = $this->model_setting_setting->getSetting('markup');
+				
+				$markup_key = $this->request->get['markup_price'];
+				
+				$products = $this->model_sale_order->getOrderProducts($this->request->get['order_id']);
+	
+				//Сумма по розничной цены для привязке к скидкам
+				$price_sub_total = 0;
+				if($markup_key == 'markup'){
+					foreach ($products as $product) {
+						$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+					
+						$markup_data = $markup;
+						if($product_info['is_price']){
+							$markup_data = array(
+												'markup_status' => $markup['markup_status'],
+												'markup_price1' => $product_info['price1'],
+												'markup_price2' => $product_info['price2'],
+												'markup_price3' => $product_info['price3'],
+												'markup_currency_id' => $product_info['currency_id'],
+												'markup_minimum_pak' => $product_info['minimum_pak'],
+												'markup_minimum_sum' => $markup['markup_minimum_sum'],
+												'markup_customer_group_id' => $product_info['customer_group_id'],
+												 );
+						}
+						
+						$price = (float)$product['price']/100*(int)$markup_data['markup_price1']+(float)$product['price'];
+						$price_sub_total += $price * (float)$product['quantity'];	
+						
+					}
+				}
+	
+				$sub_total = 0;
+	
+				foreach ($products as $product) {
+					
+					$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+					
+					$markup_data = $markup;
+					if($markup_data['markup_currency_id'] > 1){
+						$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+					}
+					
+					if($product_info['is_price']){
+						
+						if($product_info['currency_id'] > 0){
+							$product_info['minimum_sum'] = ($product_info['minimum_sum']/$currencies[$product_info['currency_id']]);
+						}
+				
+						$markup_data = array(
+											'markup_status' => $markup['markup_status'],
+											'markup_price1' => $product_info['price1'],
+											'markup_price2' => $product_info['price2'],
+											'markup_price3' => $product_info['price3'],
+											'markup_currency_id' => $product_info['currency_id'],
+											'markup_minimum_pak' => $product_info['minimum_pak'],
+											'markup_minimum_sum' => $product_info['minimum_sum'],
+											'markup_customer_group_id' => $product_info['customer_group_id'],
+											 );
+					}
+					
+					if((int)$markup_data['markup_status']){
+					
+						if(!(int)$product_info['currency_id']) $product_info['currency_id'] = $currencies_code_to_id[$this->config->get('config_currency')];
+					
+						$product['price'] = $product_info['price'] /$currencies[$product_info['currency_id']];
+					
+						if($markup_key == 'opt'){
+							
+							$price = (float)$product['price']/100*(int)$markup_data['markup_price3']+(float)$product['price'];
+							$total = $price * (float)$product['quantity'];
+							//echo '<br>'.$price.' '.$product['price']. ' == '.$markup_data['markup_price3'];
+						
+						}elseif($markup_key == 'pak'){
+							
+							$price = (float)$product['price']/100*(int)$markup_data['markup_price2']+(float)$product['price'];
+							$total = $price * (float)$product['quantity'];
+							//echo '<br>'.$price.' '.$product['price']. ' == '.$markup_data['markup_price2'];
+						
+						}elseif($markup_key == 'price'){
+							
+							$price = (float)$product['price']/100*(int)$markup_data['markup_price1']+(float)$product['price'];
+							$total = $price * (float)$product['quantity'];
+							//echo '<br>'.$price.' '.$product['price']. ' == '.$markup_data['markup_price1'];
+						
+						}elseif($markup_key == 'markup'){
+							
+							//Розница
+							$price = (float)$product['price']/100*(int)$markup_data['markup_price1']+(float)$product['price'];
+							
+							//Если пачка
+							if($product['quantity'] > $markup_data['markup_minimum_pak']){
+								$price = (float)$product['price']/100*(int)$markup_data['markup_price2']+(float)$product['price'];
+							}
+							
+							//Если сумма заказа больше опта
+							
+							if($price_sub_total > $markup_data['markup_minimum_sum']){
+								$price = (float)$product['price']/100*(int)$markup_data['markup_price3']+(float)$product['price'];
+							}
+							
+							$total = $price * (float)$product['quantity'];
+							//echo '<br>'.$price.' '.$product['price']. ' == '.$markup_data['markup_price1'];
+						
+						}
+					
+						$sub_total += $total;
+						
+						$this->db->query('UPDATE  '.DB_PREFIX.'order_product SET price="'.(float)$price.'", total="'.(float)$total.'" WHERE order_product_id="'.$product['order_product_id'].'"');
+
+					}
+			
+				}
+				
+				$r = $this->db->query('SELECT SUM(`value`) AS total FROM '.DB_PREFIX.'order_total WHERE order_id="'.(int)$order_id.'" AND code <> "sub_total" AND code <> "total"');
+				$another_total = $r->row['total'];
+				
+				$this->db->query('UPDATE '.DB_PREFIX.'order_total SET value="'.(float)$sub_total.'" WHERE order_id="'.(int)$order_id.'" AND code = "sub_total"');
+				$this->db->query('UPDATE '.DB_PREFIX.'order_total SET value="'.((float)$sub_total+(float)$another_total).'" WHERE order_id="'.(int)$order_id.'" AND code = "total"');
+				$this->db->query('UPDATE '.DB_PREFIX.'order SET total="'.((float)$sub_total+(float)$another_total).'" WHERE order_id="'.(int)$order_id.'"');
+				
+				
+			}
+			//====================== markup_price
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/extension/module/bestseller.php">
+	<operation>
+		<search><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$$markup_data['markup_currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$$markup_data['markup_currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$$markup_data['markup_currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$$markup_data['markup_currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/category.php">
+	<operation>
+		<search index="1"><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add  position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$result['currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$result['currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$result['currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$result['currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/extension/module/latest.php">
+	<operation>
+		<search><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$result['currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$result['currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$result['currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$result['currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/manufacturer.php">
+	<operation>
+		<search><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$result['currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$result['currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$result['currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$result['currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/special.php">
+	<operation>
+		<search><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$result['currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$result['currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$result['currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$result['currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/compare.php">
+	<operation>
+		<search><![CDATA[
+		if ($product_info) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($product_info['is_price']){
+					
+					if($product_info['currency_id'] > 0){
+						$product_info['minimum_sum'] = ($product_info['minimum_sum']/$currencies[$product_info['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $product_info['price1'],
+										'markup_price2' => $product_info['price2'],
+										'markup_price3' => $product_info['price3'],
+										'markup_currency_id' => $product_info['currency_id'],
+										'markup_minimum_pak' => $product_info['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $product_info['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $product_info['price'];
+				$product_info['price1'] = $product_info['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$product_info['currency_id']];
+				$product_info['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$product_info['currency_id']];
+				$product_info['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$product_info['currency_id']];
+				$product_info['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$product_info['currency_id']];
+				
+				if ($product_info['image']) {
+					$image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);
+				} else {
+					$image = $this->model_tool_image->resize('placeholder.png', $setting['width'], $setting['height']);
+				}
+
+				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+					$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$price = false;
+				}
+				
+				$price1 = $this->currency->format($this->tax->calculate($product_info['price1'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($product_info['price2'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($product_info['price3'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($product_info['markup_minimum_sum'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$product_info['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$product_info['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($product_info['minimum_pak'] < 1) $product_info['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'      => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $product_info['minimum_pak'],
+		'customer_group_id'       => (int)$product_info['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/product/search.php">
+	<operation>
+		<search><![CDATA[
+		foreach ($results as $result) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+				$markup_data = $markup;
+				if($markup_data['markup_currency_id'] > 1){
+					$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+				}
+				
+				if($result['is_price']){
+					
+					if($result['currency_id'] > 0){
+						$result['minimum_sum'] = ($result['minimum_sum']/$currencies[$result['currency_id']]);
+					}
+			
+					$markup_data = array(
+										'markup_status' => $markup['markup_status'],
+										'markup_price1' => $result['price1'],
+										'markup_price2' => $result['price2'],
+										'markup_price3' => $result['price3'],
+										'markup_currency_id' => $result['currency_id'],
+										'markup_minimum_pak' => $result['minimum_pak'],
+										'markup_minimum_sum' => $markup['markup_minimum_sum'],
+										'markup_customer_group_id' => $result['customer_group_id'],
+										 );
+				}
+				
+				$tmp_price = $result['price'];
+				$result['price1'] = $result['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$result['currency_id']];
+				$result['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$result['currency_id']];
+				$result['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$result['currency_id']];
+				$result['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$result['currency_id']];
+				
+				$price1 = $this->currency->format($this->tax->calculate($result['price1'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price2 = $this->currency->format($this->tax->calculate($result['price2'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$price3 = $this->currency->format($this->tax->calculate($result['price3'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				$minimum_sum = $this->currency->format($this->tax->calculate($result['markup_minimum_sum'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if((int)$result['customer_group_id'] > 0){
+					if (!$this->customer->isLogged()){
+						$price3 = false;
+					}
+					if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$result['customer_group_id']){
+						$price3 = false;
+					}
+				}
+				if($result['minimum_pak'] < 1) $result['minimum_pak'] = 1;
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $result['minimum_pak'],
+		'customer_group_id'       => (int)$result['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/extension/module/featured.php">
+	<operation>
+		<search><![CDATA[
+		if ($product_info) {
+		]]></search>
+		<add position="after"><![CDATA[
+                // markup
+					$markup_data = $markup;
+					if($markup_data['markup_currency_id'] > 1){
+						$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+					}
+					
+					if($product_info['is_price']){
+						
+						if($product_info['currency_id'] > 0){
+							$product_info['minimum_sum'] = ($product_info['minimum_sum']/$currencies[$product_info['currency_id']]);
+						}
+				
+						$markup_data = array(
+											'markup_status' => $markup['markup_status'],
+											'markup_price1' => $product_info['price1'],
+											'markup_price2' => $product_info['price2'],
+											'markup_price3' => $product_info['price3'],
+											'markup_currency_id' => $product_info['currency_id'],
+											'markup_minimum_pak' => $product_info['minimum_pak'],
+											'markup_minimum_sum' => $markup['markup_minimum_sum'],
+											'markup_customer_group_id' => $product_info['customer_group_id'],
+											 );
+					}
+					
+					$tmp_price = $product_info['price'];
+					$product_info['price1'] = $product_info['price'] = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$product_info['currency_id']];
+					$product_info['price2'] = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$product_info['currency_id']];
+					$product_info['price3'] = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$product_info['currency_id']];
+					$product_info['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$product_info['currency_id']];
+					
+					if ($product_info['image']) {
+						$image = $this->model_tool_image->resize($product_info['image'], $setting['width'], $setting['height']);
+					} else {
+						$image = $this->model_tool_image->resize('placeholder.png', $setting['width'], $setting['height']);
+					}
+
+					if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+						$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					} else {
+						$price = false;
+					}
+					
+					$price1 = $this->currency->format($this->tax->calculate($product_info['price1'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$price2 = $this->currency->format($this->tax->calculate($product_info['price2'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$price3 = $this->currency->format($this->tax->calculate($product_info['price3'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$minimum_sum = $this->currency->format($this->tax->calculate($product_info['markup_minimum_sum'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					if((int)$product_info['customer_group_id'] > 0){
+						if (!$this->customer->isLogged()){
+							$price3 = false;
+						}
+						if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$product_info['customer_group_id']){
+							$price3 = false;
+						}
+					}
+					if($product_info['minimum_pak'] < 1) $product_info['minimum_pak'] = 1;
+				
+
+					// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'special'     => $special,
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		'price'       => $price,
+		'price1'       => $price1,
+		'price2'       => $price2,
+		'price3'       => $price3,
+		'minimum_sum'       => $minimum_sum,
+		'minimum_pak'       => $product_info['minimum_pak'],
+		'customer_group_id'       => (int)$product_info['customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->load->model('tool/image');
+		]]></search>
+		<add position="before"><![CDATA[
+        // markup
+		$this->load->model('setting/setting');
+		$this->load->model('localisation/currency');
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->model_setting_setting->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+	</file>
+<file path="system/library/cart/cart.php">
+	<operation>
+		<search><![CDATA[
+		$download_data = array();
+		]]></search>
+		<add position="before"><![CDATA[
+                // markup
+				if(!isset($product_special_query->row['price'])){
+				$product_info = $product_query->row;
+					$markup_data = $markup;
+					if($markup_data['markup_currency_id'] > 1){
+						$markup_data['markup_minimum_sum'] = $markup_data['markup_minimum_sum']/$currencies[$markup_data['markup_currency_id']];
+					}
+			
+					if($product_info['is_price']){
+						
+						if($product_info['currency_id'] > 0){
+							$product_info['minimum_sum'] = ($product_info['minimum_sum']/$currencies[$product_info['currency_id']]);
+						}
+				
+						$markup_data = array(
+											'markup_status' => $markup['markup_status'],
+											'markup_price1' => $product_info['price1'],
+											'markup_price2' => $product_info['price2'],
+											'markup_price3' => $product_info['price3'],
+											'markup_currency_id' => $product_info['currency_id'],
+											'markup_minimum_pak' => $product_info['minimum_pak'],
+											'markup_minimum_sum' => $markup['markup_minimum_sum'],
+											'markup_customer_group_id' => $product_info['customer_group_id'],
+											 );
+					}
+					
+					$tmp_price = $price;
+
+					
+					$price = $price1 = $tmp_price*(100+$markup_data['markup_price1'])/100/$currencies[$product_info['currency_id']];
+					$price2 = $tmp_price*(100+$markup_data['markup_price2'])/100/$currencies[$product_info['currency_id']];
+					$price3 = $tmp_price*(100+$markup_data['markup_price3'])/100/$currencies[$product_info['currency_id']];
+					$markup_minimum_sum = $markup_data['markup_minimum_sum']/$currencies[$product_info['currency_id']];
+				
+						
+					//$price = $price1 = $this->currency->format($this->tax->calculate($product_info['price1'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					//$price2 = $this->currency->format($this->tax->calculate($product_info['price2'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					//$price3 = $this->currency->format($this->tax->calculate($product_info['price3'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					//$minimum_sum = $this->currency->format($this->tax->calculate($product_info['markup_minimum_sum'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					if((int)$product_info['customer_group_id'] > 0){
+						if (!$this->customer->isLogged()){
+							$price3 = false;
+						}
+						if ($this->customer->isLogged() AND $this->customer->getGroupId() != (int)$product_info['customer_group_id']){
+							$price3 = false;
+						}
+					}
+					if($product_info['minimum_pak'] < 1) $product_info['minimum_pak'] = 1;
+				
+					if(!$is_total){
+						if($markup_data['markup_minimum_pak'] < $cart['quantity']){
+							$price = $price2;
+						}
+					
+						if($markup_minimum_sum < $this->origin_total AND $price3){
+							$price = $price3;
+						}
+					}
+					
+				}else{
+					$price1 = false;
+					$price2 = false;
+					$price3 = false;
+					$markup_minimum_sum = false;
+					$markup_data['markup_minimum_pak'] = false;
+					$markup_data['markup_customer_group_id'] = 0;
+				}
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$this->weight = $registry->get('weight');
+		]]></search>
+		<add position="before"><![CDATA[
+	    // markup
+		$this->model_localisation_currency = $registry->get('model_localisation_currency');
+		$this->currency = $registry->get('currency');
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		public function getProducts() {
+		]]></search>
+		<add position="before"><![CDATA[
+    // markup
+	public function getOriginSubTotal($is_total) {
+		
+		if($is_total) return false;
+		$total = 0;
+
+		foreach ($this->getProducts(true) as $product) {
+			$total += $product['total'];
+		}
+
+		$this->origin_total = $total;
+	}
+	public function getSetting($code, $store_id = 0) {
+		$data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "setting WHERE store_id = '" . (int)$store_id . "' AND `code` = '" . $this->db->escape($code) . "'");
+
+		foreach ($query->rows as $result) {
+			if (!$result['serialized']) {
+				$data[$result['key']] = $result['value'];
+			} else {
+				$data[$result['key']] = json_decode($result['value'], true);
+			}
+		}
+
+		return $data;
+	}
+	// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		'option'          => $option_data,
+		]]></search>
+		<add position="after"><![CDATA[
+		// markup
+			'price'       => $price,
+			'price1'       => $price1,
+			'price2'       => $price2,
+			'price3'       => $price3,
+			'minimum_sum'       => $markup_minimum_sum,
+			'minimum_pak'       => $markup_data['markup_minimum_pak'],
+			'customer_group_id'       => (int)$markup_data['markup_customer_group_id'],
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		public function getProducts() {
+		]]></search>
+		<add position="after"><![CDATA[
+	    // markup
+		if(!$is_total){
+			$this->getOriginSubTotal($is_total);
+		}
+		
+		$results = $this->model_localisation_currency->getCurrencies();
+		$currencies[0] = 1;
+		foreach ($results as $result) {
+			$currencies[$result['currency_id']] = $result['value'];
+			$currencies_code_to_id[$result['code']] = $result['currency_id'];
+		}		
+		$markup = $this->getSetting('markup');
+		// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		public function getProducts() {
+		]]></search>
+		<add position="replace"><![CDATA[
+        public function getProducts($is_total = false) {
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/controller/checkout/cart.php">
+	<operation>
+		<search><![CDATA[
+		$data['products'][] = array(
+		]]></search>
+		<add position="before"><![CDATA[
+				// markup
+				$paks = 0;
+				$int = 0;
+				if($product['minimum_pak'] > 1){
+					$paks = floor($product['quantity']/$product['minimum_pak']);
+					$int = $product['quantity']%$product['minimum_pak'];
+				}else{
+					$int = $product['quantity'];
+				}
+				// markup
+		]]></add>
+	</operation>
+	<operation>
+		<search><![CDATA[
+		$data['products'][] = array(
+		]]></search>
+		<add position="after"><![CDATA[
+                    // markup
+					'int'       => $int,
+					'pack'       => $paks,
+					'price1'       => $product['price1'],
+					'price2'       => $this->currency->format($product['price2'], $this->session->data['currency']),
+					'price3'       => $this->currency->format($product['price3'], $this->session->data['currency']),
+					'minimum_sum'       => $this->currency->format($product['minimum_sum'], $this->session->data['currency']),
+					'minimum_pak'       => $product['minimum_pak'],
+					'customer_group_id'       => (int)$product['customer_group_id'],
+					// markup
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/checkout/cart.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.option %}
+		]]></search>
+		<add position="before"><![CDATA[
+              {% if product.price1 %}  
+                {% if product.price2 %}
+                  <br><small>{{ product.price2 }} пачками по {{ product.minimum_pak }} шт</small>
+                {% endif %}
+                {% if product.pack %}
+                  <br><small>пачек: {{ product.pack }}</small>
+                {% endif %}
+                {% if product.int %}
+                  <br><small>единиц: {{ product.int }}</small>
+                {% endif %}
+                {% if product.price2 %}
+                  <br><small>{{ product.price2 }} пачками по {{ product.minimum_pak }} шт</small>
+                {% endif %}
+                {% if product.price3 %}
+                  <br><small>{{ product.price3 }} от суммы {{ product.minimum_sum }}</small>
+                {% endif %}
+              {% endif %}
+		]]></add>
+	</operation>
+
+</file>
+<file path="catalog/view/theme/*/template/product/product.twig">
+	<operation>
+		<search><![CDATA[
+		<h2>{{ price }}</h2>
+		]]></search>
+		<add position="after" offset="1"><![CDATA[
+            <!-- markup -->
+            {% if price2 %}
+             <li>
+              {{ price2 }} <span>пачками по {{ minimum_pak }} шт</span>
+             </li>
+            {% endif %}
+            
+            {% if price3 %}
+             <li>
+              {{ price3 }} <span>от суммы {{ minimum_sum }}</span>
+             </li>
+            {% endif %}
+            <!-- markup -->
+		]]></add>
+	</operation>
+
+</file>
+<file path="catalog/view/theme/*/template/product/manufacturer_info.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/product/special.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/product/search.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/product/compare.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/product/category.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/extension/module/latest.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/extension/module/bestseller.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+<file path="catalog/view/theme/*/template/extension/module/featured.twig">
+	<operation>
+		<search><![CDATA[
+		{% if product.price %}
+		]]></search>
+		<add position="after"><![CDATA[
+        <!-- markup -->
+        {% if product.price2 %}
+         <p class="price3">
+          {{ product.price2 }} пачками по {{ product.minimum_pak }} шт
+         </p>
+        {% endif %}
+        
+        {% if product.price3 %}
+         <p class="price3">
+          {{ product.price3 }} от суммы {{ product.minimum_sum }}
+         </p>
+        {% endif %}
+        <!-- markup -->
+		]]></add>
+	</operation>
+</file>
+</modification>
